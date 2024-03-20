@@ -41,7 +41,6 @@ import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
 
 import mapperFunction from "./functions/mapper.mjs";
-import { reader } from "./functions/file.mjs";
 
 const main = async () => {
   const __filename = fileURLToPath(import.meta.url);

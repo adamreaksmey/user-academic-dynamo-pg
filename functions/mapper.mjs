@@ -1,3 +1,6 @@
+import { fileURLToPath, pathToFileURL } from "url";
+import { dirname, join } from "path";
+
 const mapperFunction = (
   data,
   fs,
@@ -5,6 +8,10 @@ const mapperFunction = (
   questions = [],
   answers = []
 ) => {
+  // file dirs
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+
   const removedItemName = data.map((item) => item.Item);
   fs.writeFileSync("./log/dynamo-logs.js", JSON.stringify(removedItemName));
   const removedValuePrefix = removedItemName.map((item) => {
@@ -140,8 +147,8 @@ const mapperFunction = (
   });
 
   fs.writeFileSync(
-    "./log/subjects/subject.mjs",
-    "export default" + JSON.stringify(subjects)
+    join(__dirname, "./log/subjects/subject.mjs"),
+    `export default ${subjects}`
   );
   fs.writeFileSync(
     "./log/questions/question.mjs",
