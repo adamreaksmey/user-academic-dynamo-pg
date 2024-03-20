@@ -6,3 +6,4 @@ sensitive-data/*
 sources
 
 log
+.DS_Store
