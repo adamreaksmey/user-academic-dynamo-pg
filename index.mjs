@@ -37,25 +37,29 @@
 
 // main();
 import fs from "fs";
-import { fileURLToPath, pathToFileURL } from 'url';
-import { dirname, join } from 'path';
+import { fileURLToPath, pathToFileURL } from "url";
+import { dirname, join } from "path";
 
-// Assuming mapperFunction, load_data, insert_data are correctly implemented and not shown here for brevity.
 import mapperFunction from "./functions/mapper.mjs";
+import { reader } from "./functions/file.mjs";
 
 const main = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
 
   // Correctly read and convert JSON data to string for JS module export
+  // const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
   const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
-  fs.writeFileSync(join(__dirname, `./log/data.mjs`), `export default ${data};`);
+  fs.writeFileSync(
+    join(__dirname, `./log/data.mjs`),
+    `export default ${data};`
+  );
 
   // Convert the module path to a URL string for the dynamic import
   const modulePath = join(__dirname, "./log/data.mjs");
   const jsMapped = await import(pathToFileURL(modulePath).toString());
 
-  mapperFunction(jsMapped.default, fs)
+  mapperFunction(jsMapped.default, fs);
 
   // Continue with your logic
   console.log("Generating sql script....");
