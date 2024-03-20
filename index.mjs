@@ -54,7 +54,8 @@ const main = async () => {
   // Convert the module path to a URL string for the dynamic import
   const modulePath = join(__dirname, "./log/data.mjs");
   const jsMapped = await import(pathToFileURL(modulePath).toString());
-  console.log(jsMapped.default); // Assuming you want to log the default export
+
+  mapperFunction(jsMapped.default, fs)
 
   // Continue with your logic
   console.log("Generating sql script....");
