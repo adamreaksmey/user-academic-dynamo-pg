@@ -8,6 +8,8 @@ sources
 log
 .DS_Store
 
+__pycache__/
+
 # Ignore everything in the sources folder
 sources/*
 !sources/note.txt
