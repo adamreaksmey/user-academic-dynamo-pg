@@ -24,7 +24,7 @@ import { dirname, join } from "path";
  *
  */
 
-import { dobHandlder, headerHandler } from "./operations/data.mjs";
+import { dobHandlder, headerHandler, idCardHandler } from "./operations/data.mjs";
 
 const mapperFunction = (data, fs) => {
   // file dirs
@@ -40,7 +40,7 @@ const mapperFunction = (data, fs) => {
       tableName: "students",
       schoolId: item.organizationId?.S ?? "",
       campusId: "",
-      idCard: item.idCard?.S ?? "",
+      idCard: idCardHandler(item.idCard?.S),
       firstName: item.firstName?.S ?? "",
       lastName: item.lastName?.S ?? "",
       firstNameNative: item.firstName?.S ?? "",
@@ -53,7 +53,6 @@ const mapperFunction = (data, fs) => {
 
     return mappedData;
   });
-  // .filter(Boolean);
 
   // console.log(removedValuePrefix);
 

@@ -8,11 +8,11 @@ import { insert_data } from "./functions/sqlGenerator.mjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-let _data = [];
-
 const main = async (__filename, __dirname) => {
   // Correctly read and convert JSON data to string for JS module export
   // const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
+  console.log("-- importing file data --")
+
   const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
   fs.writeFileSync(
     join(__dirname, `./log/data.mjs`),
@@ -24,21 +24,26 @@ const main = async (__filename, __dirname) => {
   let uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
   let jsMapped = await import(uniqueUrl);
 
+  console.log("-- mapping file data --")
   mapperFunction(jsMapped.default, fs);
 
-  // // Import again with a new unique URL to get the updated module
-  // modulePath = join(__dirname, "./log/data.mjs");
-  // uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
-  // const allData = await import(uniqueUrl);
+  // Import again with a new unique URL to get the updated module
+  console.log("-- re-importing --")
 
-  // console.log("Generating sql script....");
-  // const qResponse = insert_data(allData.default);
-  // fs.writeFileSync(
-  //   join(__dirname, `./generated_sql/migration_queries.sql`),
-  //   qResponse.join('\n')
-  // );
+  modulePath = join(__dirname, "./log/data.mjs");
+  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
+  const allData = await import(uniqueUrl);
 
-  // console.log("SQL file generated successfully.");
+  console.log(allData.default)
+
+  console.log("-- generating sql --")
+  const qResponse = await insert_data(allData.default);
+  fs.writeFileSync(
+    join(__dirname, `./generated_sql/migration_queries.sql`),
+    qResponse.join('\n')
+  );
+
+  console.log("SQL file generated successfully.");
 };
 
 main(__filename, __dirname).catch(console.error);

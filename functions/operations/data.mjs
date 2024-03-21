@@ -1,11 +1,11 @@
 export const dobHandlder = (item) => {
   let response = null;
   try {
-    if (!item) {
+    if (item) {
       if (item.hasOwnProperty("date_of_birth")) {
-        response = item?.date_of_birth;
+        response = item?.date_of_birth?.S;
       } else if (item.hasOwnProperty("dob")) {
-        response = item?.dob;
+        response = item?.dob?.S;
       }
     } else {
       response = false;
@@ -22,4 +22,11 @@ export const headerHandler = (item) => {
     item.idCard?.S == "" ||
     !item.idCard?.S
   );
+};
+
+export const idCardHandler = (idCard) => {
+  if (idCard == "empty") {
+    return "";
+  }
+  return idCard;
 };
