@@ -7,3 +7,17 @@ sources
 
 log
 .DS_Store
+
+__pycache__/
+
+# Ignore everything in the sources folder
+sources/*
+!sources/note.txt
+
+# Ignore everything in the logs folder
+logs/*
+!logs/note.txt
+
+# Ignore everything in the generated_sql folder
+generated_sql/*
+!generated_sql/note.txt
