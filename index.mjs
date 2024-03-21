@@ -8,9 +8,10 @@ import { insert_data } from "./functions/sqlGenerator.mjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-let questions = [],
-  subjects = [],
-  answers = [];
+let questions = [];
+let subjects = [];
+let answers = [];
+let data = [];
 
 const loadModules = async () => {
   const questionModule = await import("./log/questions/question.mjs");
@@ -21,6 +22,9 @@ const loadModules = async () => {
 
   const answerModule = await import("./log/answers/answer.mjs");
   answers = answerModule.default;
+
+  const allData = await import("./log/data.mjs");
+  data = allData;
 };
 
 const main = async (__filename, __dirname) => {
@@ -37,21 +41,10 @@ const main = async (__filename, __dirname) => {
   const jsMapped = await import(pathToFileURL(modulePath).toString());
 
   mapperFunction(jsMapped.default, fs);
-  await loadModules()
-    .then(() => {
-      console.log({
-        question: questions,
-        subjects: subjects,
-        answers: answers,
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
 
   // Continue with your logic
   console.log("Generating sql script....");
-  // Further logic for mapper function and SQL generation...
+  insert_data(data);
 
   console.log("SQL file generated successfully.");
 };
