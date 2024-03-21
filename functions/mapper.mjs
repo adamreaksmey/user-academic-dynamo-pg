@@ -57,7 +57,7 @@ const mapperFunction = (data, fs) => {
   // console.log(removedValuePrefix);
 
   fs.writeFileSync(
-    join(__dirname, "../log/data.mjs"),
+    join(__dirname, "../logs/data.mjs"),
     `export default ${JSON.stringify(removedValuePrefix)}`
   );
 };

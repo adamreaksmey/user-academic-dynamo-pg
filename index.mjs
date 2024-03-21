@@ -1,9 +1,11 @@
 import fs from "fs";
 import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
+import path from "path";
 
 import mapperFunction from "./functions/mapper.mjs";
 import { insert_data } from "./functions/sqlGenerator.mjs";
+import { reWriter } from "./functions/re-writer.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,27 +16,13 @@ const main = async (__filename, __dirname) => {
   console.log("-- importing file data --");
 
   const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
-  const filePath = path.join(__dirname, "./log/data.mjs");
+  const filePath = path.join(__dirname, "./logs/data.mjs");
   const fileContent = `export default ${data};`;
 
-  try {
-    fs.writeFileSync(filePath, fileContent);
-    console.log("File created successfully at", filePath);
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      // Create the parent directory if it doesn't exist
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-
-      // Write the file again
-      fs.writeFileSync(filePath, fileContent);
-      console.log("File created successfully at", filePath);
-    } else {
-      console.error("Error occurred while writing the file:", error);
-    }
-  }
+  reWriter(filePath, fileContent, fs, path);
 
   // Initial import with unique URL to bypass cache
-  let modulePath = join(__dirname, "./log/data.mjs");
+  let modulePath = join(__dirname, "./logs/data.mjs");
   let uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
   let jsMapped = await import(uniqueUrl);
 
@@ -44,11 +32,9 @@ const main = async (__filename, __dirname) => {
   // Import again with a new unique URL to get the updated module
   console.log("-- re-importing --");
 
-  modulePath = join(__dirname, "./log/data.mjs");
+  modulePath = join(__dirname, "./logs/data.mjs");
   uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
   const allData = await import(uniqueUrl);
-
-  console.log(allData.default);
 
   console.log("-- generating sql --");
   const qResponse = await insert_data(allData.default);
