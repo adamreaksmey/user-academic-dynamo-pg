@@ -26,19 +26,19 @@ const main = async (__filename, __dirname) => {
 
   mapperFunction(jsMapped.default, fs);
 
-  // Import again with a new unique URL to get the updated module
-  modulePath = join(__dirname, "./log/data.mjs");
-  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
-  const allData = await import(uniqueUrl);
+  // // Import again with a new unique URL to get the updated module
+  // modulePath = join(__dirname, "./log/data.mjs");
+  // uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
+  // const allData = await import(uniqueUrl);
 
-  console.log("Generating sql script....");
-  const qResponse = insert_data(allData.default);
-  fs.writeFileSync(
-    join(__dirname, `./generated_sql/migration_queries.sql`),
-    qResponse.join('\n')
-  );
+  // console.log("Generating sql script....");
+  // const qResponse = insert_data(allData.default);
+  // fs.writeFileSync(
+  //   join(__dirname, `./generated_sql/migration_queries.sql`),
+  //   qResponse.join('\n')
+  // );
 
-  console.log("SQL file generated successfully.");
+  // console.log("SQL file generated successfully.");
 };
 
 main(__filename, __dirname).catch(console.error);
