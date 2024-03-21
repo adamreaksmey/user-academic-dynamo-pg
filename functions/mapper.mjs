@@ -146,7 +146,6 @@ const mapperFunction = (
     return item;
   });
 
-  console.log("____dirname", __dirname);
   fs.writeFileSync(
     join(__dirname, "../log/subjects/subject.mjs"),
     `export default ${JSON.stringify(subjects)}`
