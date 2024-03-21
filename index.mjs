@@ -1,51 +1,29 @@
-// import { load_data } from "./functions/dataLoader.mjs";
-// import { insert_data } from "./functions/sqlGenerator.mjs";
-// import fs from "fs";
-// import { fileURLToPath } from 'url';
-// import { dirname, join, path } from 'path';
-
-// import mapperFunction from "./functions/mapper.mjs";
-
-// const main = async () => {
-//   const __filename = fileURLToPath(import.meta.url);
-//   const __dirname = dirname(__filename);
-
-//   const data = fs.readFileSync("./sources/data.json");
-//   fs.writeFileSync(`./log/data.mjs`, "export default" + data);
-
-//   const modulePath = path.join(__dirname, "./log/data.mjs");
-//   const jsMapped = await import(modulePath);
-//   console.log(jsMapped);
-
-//   // very important function, it maps data to generate correct queries.
-//   // mapperFunction(mainData, fs);
-
-//   console.log("Generating sql script....");
-//   // console.log(subject)
-
-//   // for (let i = 0; i < _data.length; i++) {
-//   //   const queries = insert_data(_data[i]);
-//   //   contents.push(queries.join("\n"));
-//   // }
-
-//   // fs.writeFileSync(`./generated_sql/subjects/subject.sql`, contents[0]);
-//   // fs.writeFileSync(`./generated_sql/questions/question.sql`, contents[1]);
-//   // fs.writeFileSync(`./generated_sql/answers/answer.sql`, contents[2]);
-
-//   console.log("SQL file generated successfully.");
-// };
-
-// main();
 import fs from "fs";
 import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
 
 import mapperFunction from "./functions/mapper.mjs";
+import { insert_data } from "./functions/sqlGenerator.mjs";
 
-const main = async () => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
+let questions = [],
+  subjects = [],
+  answers = [];
+
+const loadModules = async () => {
+  const questionModule = await import("./log/questions/question.mjs");
+  questions = questionModule.default;
+
+  const subjectModule = await import("./log/subjects/subject.mjs");
+  subjects = subjectModule.default;
+
+  const answerModule = await import("./log/answers/answer.mjs");
+  answers = answerModule.default;
+};
+
+const main = async (__filename, __dirname) => {
   // Correctly read and convert JSON data to string for JS module export
   // const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
   const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
@@ -59,6 +37,17 @@ const main = async () => {
   const jsMapped = await import(pathToFileURL(modulePath).toString());
 
   mapperFunction(jsMapped.default, fs);
+  await loadModules()
+    .then(() => {
+      console.log({
+        question: questions,
+        subjects: subjects,
+        answers: answers,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 
   // Continue with your logic
   console.log("Generating sql script....");
@@ -67,4 +56,4 @@ const main = async () => {
   console.log("SQL file generated successfully.");
 };
 
-main().catch(console.error);
+main(__filename, __dirname).catch(console.error);

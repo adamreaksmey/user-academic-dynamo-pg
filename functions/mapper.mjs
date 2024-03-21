@@ -146,22 +146,23 @@ const mapperFunction = (
     return item;
   });
 
+  console.log("____dirname", __dirname);
   fs.writeFileSync(
-    join(__dirname, "./log/subjects/subject.mjs"),
-    `export default ${subjects}`
+    join(__dirname, "../log/subjects/subject.mjs"),
+    `export default ${JSON.stringify(subjects)}`
   );
   fs.writeFileSync(
-    "./log/questions/question.mjs",
-    "export default" + JSON.stringify(mutataedQuestions)
+    join(__dirname, "../log/questions/question.mjs"),
+    `export default ${JSON.stringify(mutataedQuestions)}`
   );
   fs.writeFileSync(
-    "./log/answers/answer.mjs",
-    "export default" + JSON.stringify(mutatedAnswers)
+    join(__dirname, "../log/answers/answer.mjs"),
+    `export default ${JSON.stringify(mutatedAnswers)}`
   );
 
   fs.writeFileSync(
-    "./log/data.mjs",
-    "export default" + JSON.stringify(removedValuePrefix)
+    join(__dirname, "../log/data.mjs"),
+    `export default ${JSON.stringify(removedValuePrefix)}`
   );
 };
 
