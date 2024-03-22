@@ -15,3 +15,5 @@ in your VScode, cmd + P or ctrl + P as it will open the search bar,
 3. Select all of your json data, place it inside a sqaure bracket "[]"
 
 4. Your json is now a valid json, you can format this with prettier and your data is ready to be converted.
+
+5. For python branch, replace all true with True and false with False

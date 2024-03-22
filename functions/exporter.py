@@ -1,20 +1,23 @@
 import os
+import re
 
 def add_export_default(input_file, output_file):
     try:
         # Check if the input file exists
         if not os.path.exists(input_file):
-            # If input file doesn't exist, create a new one
+            print("Input file does not exist, creating with default content.")
             with open(input_file, 'w') as f:
-                # Write default content
                 f.write("# Default content\n")
-                print("Input file created at", input_file)
+                return  # End execution after creating the default file
         
-        # Read content from the input file
+        # Read content from the input file as a plain string
         with open(input_file, 'r') as f:
             file_content = f.read()
         
-        # Add "export default" in front of the content
+        # Optimize regular expressions by combining them
+        file_content = re.sub(r'\btrue\b', 'True', re.sub(r'\bfalse\b', 'False', file_content))
+        
+        # Prepare new content with modifications
         new_content = "reWrittenDatas = " + file_content
         
         # Write the modified content to the output file
