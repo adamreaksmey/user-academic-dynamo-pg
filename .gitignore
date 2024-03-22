@@ -13,3 +13,5 @@ logs/*
 # Ignore everything in the generated_sql folder
 generated_sql/*
 !generated_sql/note.txt
+
+venv
