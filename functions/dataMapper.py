@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 # Assuming dobHandler, idCardHandler, and startDateHandler are equivalent Python functions
-from operations.data import dob_handler, id_card_handler, start_date_handler
+from operations import dob_handler, id_card_handler, start_date_handler
 
 def mapper_function(data, output_directory):
     # Construct the file path for the output
