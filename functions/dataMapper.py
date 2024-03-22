@@ -32,5 +32,5 @@ def mapper_function(data, output_directory):
 
     # Write the processed data to a file
     with open(output_path, 'w') as f:
-        f.write(f"reWrittenDatas = {json.dumps(removed_value_prefix, indent=2)}")
+        f.write(f"reWrittenDatas = {json.dumps(removed_value_prefix, indent = 2)}")
 
