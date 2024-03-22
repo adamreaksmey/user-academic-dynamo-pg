@@ -1,7 +1,5 @@
 import json
-import re
 from pathlib import Path
-import uuid
 
 from functions.operations.data import dob_handler, id_card_handler, schoolIdHandler
 
