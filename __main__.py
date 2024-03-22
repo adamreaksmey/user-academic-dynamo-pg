@@ -1,4 +1,3 @@
-import os
 from functions.exporter import add_export_default
 import importlib
 from functions.defaultWriter import ensure_reWrittenDatas_defined
