@@ -2,12 +2,11 @@ import json
 import os
 from pathlib import Path
 
-# Assuming dobHandler, idCardHandler, and startDateHandler are equivalent Python functions
-from operations import dob_handler, id_card_handler, start_date_handler
+from functions.operations.data import dob_handler, id_card_handler
 
 def mapper_function(data, output_directory):
     # Construct the file path for the output
-    output_path = Path(output_directory) / "logs/data.py"
+    output_path = Path(output_directory) / "logs/content.py"
 
     # Process the data
     removed_item_name = [item['Item'] for item in data]
@@ -35,9 +34,3 @@ def mapper_function(data, output_directory):
     with open(output_path, 'w') as f:
         f.write(f"reWrittenDatas = {json.dumps(removed_value_prefix, indent=2)}")
 
-# Example usage
-# Assuming `data` is a list of dictionaries representing your data,
-# and assuming the equivalent Python functions `dob_handler`, `id_card_handler`, and `start_date_handler` are defined
-data = [...]  # Your data here
-output_directory = '.'  # Adjust as necessary
-mapper_function(data, output_directory)

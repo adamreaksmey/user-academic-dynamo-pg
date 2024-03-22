@@ -14,3 +14,7 @@ def dob_handler(item):
     return response
 
 
+def id_card_handler(idCard):
+    if idCard == "empty":
+        return ""
+    return idCard

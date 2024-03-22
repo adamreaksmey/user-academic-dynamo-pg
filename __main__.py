@@ -1,6 +1,7 @@
 from functions.exporter import add_export_default
 import importlib
 from functions.defaultWriter import ensure_reWrittenDatas_defined
+from functions.dataMapper import mapper_function
 
 def runInitProcess():
     input_file = "./sources/data.json"
@@ -17,8 +18,8 @@ def runInitProcess():
 
     # Reload the module to reflect changes made by add_export_default
     importlib.reload(content_module)
-
-    print(content_module.reWrittenDatas)
+    output_directory = '.'  # Adjust as necessary
+    mapper_function(content_module.reWrittenDatas, output_directory)
 
 if __name__ == "__main__":
     runInitProcess()
