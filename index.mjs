@@ -37,7 +37,7 @@ const main = async (__filename, __dirname) => {
   const allData = await import(uniqueUrl);
 
   console.log("-- generating sql --");
-  const qResponse = await insert_data(allData.default);
+  const qResponse = insert_data(allData.default);
   fs.writeFileSync(
     join(__dirname, `./generated_sql/migration_queries.sql`),
     qResponse.join("\n")
