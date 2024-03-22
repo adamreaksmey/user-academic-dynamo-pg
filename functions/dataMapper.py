@@ -1,5 +1,5 @@
 import json
-import os
+import re
 from pathlib import Path
 
 from functions.operations.data import dob_handler, id_card_handler
@@ -14,18 +14,22 @@ def mapper_function(data, output_directory):
 
     for item in removed_item_name:
         mapped_data = {
-            "tableName": "students",
+            "tableName": "student",
             "schoolId": item.get("organizationId", {}).get("S", ""),
             "campusId": "",
             "idCard": id_card_handler(item.get("idCard", {}).get("S", "")),
-            "firstName": item.get("firstName", {}).get("S", ""),
-            "lastName": item.get("lastName", {}).get("S", ""),
+            "firstName": item.get("firstName", {}).get("S", "N/A"),
+            "lastName": item.get("lastName", {}).get("S", "N/A"),
             "firstNameNative": item.get("firstName", {}).get("S", ""),
             "lastNameNative": item.get("lastName", {}).get("S", ""),
             "gender": item.get("gender", {}).get("S", "").lower(),
             "dob": dob_handler(item) or "",
             "remark": item.get("remark", {}).get("S", ""),
-            "status": item.get("status", {}).get("S", "")
+            "status": item.get("status", {}).get("S", "start"),
+            "profile": {
+                "position": item.get("position", {}).get("S", "").replace("'", "`"),
+                "phone": item.get("phone", {}).get("S", "")
+            }
         }
 
         removed_value_prefix.append(mapped_data)
