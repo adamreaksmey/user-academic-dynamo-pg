@@ -16,6 +16,17 @@ export const dobHandlder = (item) => {
   }
 };
 
+export const startDateHandler = (item) => {
+  let response = null;
+  if (item.hasOwnProperty("NULL")) {
+    response = "";
+  } else if (item.hasOwnProperty("S")) {
+    response = item?.S;
+  }
+
+  return response;
+};
+
 export const headerHandler = (item) => {
   return (
     (item.hasOwnProperty("idCard") && item.idCard?.S !== "empty") ||

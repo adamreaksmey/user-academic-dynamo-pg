@@ -24,7 +24,11 @@ import { dirname, join } from "path";
  *
  */
 
-import { dobHandlder, headerHandler, idCardHandler } from "./operations/data.mjs";
+import {
+  dobHandlder,
+  idCardHandler,
+  startDateHandler,
+} from "./operations/data.mjs";
 
 const mapperFunction = (data, fs) => {
   // file dirs
@@ -48,7 +52,7 @@ const mapperFunction = (data, fs) => {
       gender: item.gender?.S?.toLowerCase() ?? "",
       dob: dobHandlder(item) ?? "",
       remark: item?.remark?.S ?? "",
-      status: item?.status?.S ?? "",
+      status: item?.status?.S ?? ""
     };
 
     return mappedData;
