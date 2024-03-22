@@ -2,6 +2,7 @@ from functions.exporter import add_export_default
 import importlib
 from functions.defaultWriter import ensure_reWrittenDatas_defined
 from functions.dataMapper import mapper_function
+from functions.sql.generator import insert_data
 
 def runInitProcess():
     input_file = "./sources/data.json"
@@ -20,6 +21,14 @@ def runInitProcess():
     importlib.reload(content_module)
     output_directory = '.'  # Adjust as necessary
     mapper_function(content_module.reWrittenDatas, output_directory)
+
+    # Generating an sql script
+    importlib.reload(content_module)
+    sqlResponse = insert_data(content_module.reWrittenDatas)
+
+    sqlOutputFile = "./generated_sql/migration_queries.sql"
+    with open(sqlOutputFile, 'w') as f:
+        f.write(str(sqlResponse))
 
 if __name__ == "__main__":
     runInitProcess()
