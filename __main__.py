@@ -1,5 +1,7 @@
-from functions.exporter import add_export_default
 import importlib
+import os
+
+from functions.exporter import add_export_default
 from functions.defaultWriter import ensure_reWrittenDatas_defined
 from functions.dataMapper import mapper_function
 from functions.sql.generator import insert_data
@@ -24,11 +26,13 @@ def runInitProcess():
 
     # Generating an sql script
     importlib.reload(content_module)
-    sqlResponse = insert_data(content_module.reWrittenDatas)
+    q_response = insert_data(content_module.reWrittenDatas)
+    output_directory = '.'  # Adjust this to your specific directory structure
+    output_file = os.path.join(output_directory, 'generated_sql/migration_queries.sql')
 
-    sqlOutputFile = "./generated_sql/migration_queries.sql"
-    with open(sqlOutputFile, 'w') as f:
-        f.write(str(sqlResponse))
+    # Write the SQL queries to a file
+    with open(output_file, 'w') as file:
+        file.write("\n".join(q_response))
 
 if __name__ == "__main__":
     runInitProcess()
