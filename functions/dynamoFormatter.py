@@ -15,7 +15,10 @@ def format_dynamodb_json(input_filename, output_filename):
         formatted_content = re.sub(r',\n$', '\n', formatted_content)
         
         # Enclose the entire content within square brackets to form a valid JSON array
-        final_content = f'[{formatted_content.rstrip(",\n")}]'
+        if not (formatted_content.startswith('[') and formatted_content.endswith(']')):
+            final_content = f'[{formatted_content.rstrip(",\n")}]'
+        else:
+            final_content = formatted_content
         
         # Save the formatted content to a new file
         with open(output_filename, 'w') as file:
