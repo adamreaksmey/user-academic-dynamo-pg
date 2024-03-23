@@ -1,4 +1,4 @@
-const formatDynamoDBJson = (inputFilename, outputFilename) => {
+const formatDynamoDBJson = (inputFilename, outputFilename, fs) => {
   try {
     // Read the content from the input file
     let content = fs.readFileSync(inputFilename, { encoding: "utf8" });

@@ -6,6 +6,7 @@ import path from "path";
 import mapperFunction from "./functions/mapper.mjs";
 import { insert_data } from "./functions/sqlGenerator.mjs";
 import { reWriter } from "./functions/re-writer.mjs";
+import formatDynamoDBJson from "./functions/dynamo-formatter.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,6 +15,7 @@ const main = async (__filename, __dirname) => {
   // Correctly read and convert JSON data to string for JS module export
   // const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
   console.log("-- importing file data --");
+  formatDynamoDBJson("./sources/data.json", "./sources/data.json", fs)
 
   const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
   const filePath = path.join(__dirname, "./logs/data.mjs");

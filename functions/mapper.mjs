@@ -28,6 +28,7 @@ import {
   dobHandlder,
   idCardHandler,
   startDateHandler,
+  isUUID
 } from "./operations/data.mjs";
 
 const mapperFunction = (data, fs) => {
@@ -37,30 +38,32 @@ const mapperFunction = (data, fs) => {
 
   const removedItemName = data.map((item) => item.Item);
   // fs.writeFileSync("./log/dynamo-logs.js", JSON.stringify(removedItemName));
-  const removedValuePrefix = removedItemName.map((item) => {
-    let mappedData = {};
-
-    mappedData = {
-      tableName: "student",
-      schoolId: item.organizationId?.S ?? "",
-      campusId: "",
-      idCard: idCardHandler(item.idCard?.S),
-      firstName: item.firstName?.S ?? "N/A",
-      lastName: item.lastName?.S ?? "N/A",
-      firstNameNative: item.firstName?.S ?? "",
-      lastNameNative: item.lastName?.S ?? "",
-      gender: item.gender?.S?.toLowerCase() ?? "",
-      dob: dobHandlder(item) ?? "",
-      remark: [item?.remark?.S ?? ""],
-      status: item?.status?.S ?? "N/A",
-      profile: {
-        position: item?.position?.S?.replace("'", "`"),
-        phone: item?.phone?.S,
-      },
-    };
-
-    return mappedData;
-  });
+  const removedValuePrefix = removedItemName
+    .map((item) => {
+      if (!item.hasOwnProperty("schoolId")) {
+        return {
+          tableName: "student",
+          schoolId: isUUID(item.organizationId?.S),
+          campusId: "",
+          idCard: idCardHandler(item.idCard?.S),
+          firstName: item.firstName?.S ?? "N/A",
+          lastName: item.lastName?.S ?? "N/A",
+          firstNameNative: item.firstName?.S ?? "",
+          lastNameNative: item.lastName?.S ?? "",
+          gender: item.gender?.S?.toLowerCase() ?? "",
+          dob: dobHandlder(item) ?? "",
+          remark: [item?.remark?.S ?? ""],
+          status: item?.status?.S ?? "N/A",
+          profile: {
+            position: item?.position?.S?.replace("'", "`"),
+            phone: item?.phone?.S,
+          },
+        };
+      }
+      // If the condition is not met, return undefined
+      return undefined;
+    })
+    .filter((item) => item !== undefined);
 
   // console.log(removedValuePrefix);
 
