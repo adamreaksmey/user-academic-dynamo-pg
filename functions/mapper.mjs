@@ -32,6 +32,7 @@ import {
 } from "./operations/data.mjs";
 
 const mapperFunction = (data, fs) => {
+  console.log("-- mapping file data --");
   // file dirs
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);

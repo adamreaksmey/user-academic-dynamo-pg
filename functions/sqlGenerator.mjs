@@ -1,4 +1,5 @@
 const insert_data = (data) => {
+  console.log("-- generating sql --");
   let queries = [];
   for (let item of data) {
     // Prepare column names and values
@@ -28,4 +29,26 @@ const insert_data = (data) => {
   return queries;
 };
 
-export { insert_data };
+const sqlFileOutPutGenerator = (qResponse, __dirname, fs, path, join) => {
+
+  const filePath = path.join(__dirname, "./generated_sql/migration_queries.sql");
+  try {
+    fs.writeFileSync(
+      join(__dirname, `./generated_sql/migration_queries.sql`),
+      qResponse.join("\n")
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      // Create the parent directory if it doesn't exist
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+
+      // Write the file again
+      fs.writeFileSync(filePath, qResponse);
+      console.log("File created successfully at", filePath);
+    } else {
+      console.error("Error occurred while writing the file:", error);
+    }
+  }
+};
+
+export { insert_data, sqlFileOutPutGenerator };

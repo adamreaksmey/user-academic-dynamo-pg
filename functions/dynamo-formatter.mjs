@@ -1,8 +1,8 @@
 const formatDynamoDBJson = (inputFilename, outputFilename, fs) => {
   try {
-    // Read the content from the input file
-    let content = fs.readFileSync(inputFilename, { encoding: "utf8" });
 
+    console.log("Correcting your dynamoJSON file to proper json :) ")
+    let content = fs.readFileSync(inputFilename, { encoding: "utf8" });
     // Replace all instances of "}\n" with "},\n" to separate the objects correctly
     let formattedContent = content.replace(/\}\n/g, "},\n");
 
@@ -17,7 +17,7 @@ const formatDynamoDBJson = (inputFilename, outputFilename, fs) => {
     // Save the formatted content to a new file
     fs.writeFileSync(outputFilename, formattedContent, { encoding: "utf8" });
 
-    console.log("File has been successfully formatted and saved.");
+    console.log("File has been successfully corrected & formatted and saved.");
   } catch (error) {
     if (error.code === "ENOENT") {
       console.log(`File ${inputFilename} not found.`);
