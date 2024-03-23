@@ -1,7 +1,6 @@
 const formatDynamoDBJson = (inputFilename, outputFilename, fs) => {
   try {
-
-    console.log("Correcting your dynamoJSON file to proper json :) ")
+    console.log("Correcting your dynamoJSON file to proper json :) ");
     let content = fs.readFileSync(inputFilename, { encoding: "utf8" });
     // Replace all instances of "}\n" with "},\n" to separate the objects correctly
     let formattedContent = content.replace(/\}\n/g, "},\n");

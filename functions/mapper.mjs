@@ -28,7 +28,7 @@ import {
   dobHandlder,
   idCardHandler,
   startDateHandler,
-  isUUID
+  isUUID,
 } from "./operations/data.mjs";
 
 const mapperFunction = (data, fs) => {
@@ -70,7 +70,7 @@ const mapperFunction = (data, fs) => {
 
   fs.writeFileSync(
     join(__dirname, "../logs/data.mjs"),
-    `export default ${JSON.stringify(removedValuePrefix)}`
+    `export default ${JSON.stringify(removedValuePrefix)}`,
   );
 };
 
