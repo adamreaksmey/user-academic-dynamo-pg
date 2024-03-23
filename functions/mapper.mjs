@@ -41,18 +41,22 @@ const mapperFunction = (data, fs) => {
     let mappedData = {};
 
     mappedData = {
-      tableName: "students",
+      tableName: "student",
       schoolId: item.organizationId?.S ?? "",
       campusId: "",
       idCard: idCardHandler(item.idCard?.S),
-      firstName: item.firstName?.S ?? "",
-      lastName: item.lastName?.S ?? "",
+      firstName: item.firstName?.S ?? "N/A",
+      lastName: item.lastName?.S ?? "N/A",
       firstNameNative: item.firstName?.S ?? "",
       lastNameNative: item.lastName?.S ?? "",
       gender: item.gender?.S?.toLowerCase() ?? "",
       dob: dobHandlder(item) ?? "",
-      remark: item?.remark?.S ?? "",
-      status: item?.status?.S ?? ""
+      remark: [item?.remark?.S ?? ""],
+      status: item?.status?.S ?? "N/A",
+      profile: {
+        position: item?.position?.S?.replace("'", "`"),
+        phone: item?.phone?.S,
+      },
     };
 
     return mappedData;

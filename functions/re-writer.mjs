@@ -1,7 +1,8 @@
 export const reWriter = (filePath, fileContent, fs, path) => {
   try {
+    console.log("logs/data.mjs file found! re-writing data!")
     fs.writeFileSync(filePath, fileContent);
-    console.log("File created successfully at", filePath);
+    console.log("Content successfully written to logs/data.mjs")
   } catch (error) {
     if (error.code === "ENOENT") {
       // Create the parent directory if it doesn't exist
