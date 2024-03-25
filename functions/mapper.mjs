@@ -59,6 +59,7 @@ const mapperFunction = (data, fs) => {
             position: item?.position?.S?.replace("'", "`"),
             phone: item?.phone?.S,
           },
+          studentKeys: "",
         };
       }
       // If the condition is not met, return undefined
