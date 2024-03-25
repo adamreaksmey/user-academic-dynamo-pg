@@ -26,4 +26,6 @@ const formatDynamoDBJson = (inputFilename, outputFilename, fs) => {
   }
 };
 
+// formatDynamoDBJson("./sources/data.json", "./sources/data.json", fs);
+
 export default formatDynamoDBJson;
