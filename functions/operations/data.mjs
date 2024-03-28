@@ -10,6 +10,10 @@ export const dobHandlder = (item) => {
     } else {
       response = false;
     }
+
+    if (response == "Invalid date") {
+      response = "";
+    }
     return response;
   } catch (error) {
     console.log("DOB HANDLER ERROR", error);

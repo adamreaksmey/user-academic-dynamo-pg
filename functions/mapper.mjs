@@ -53,13 +53,12 @@ const mapperFunction = (data, fs) => {
           lastNameNative: item.lastName?.S ?? "",
           gender: item.gender?.S?.toLowerCase() ?? "",
           dob: dobHandlder(item) ?? "",
-          remark: [item?.remark?.S ?? ""],
+          remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
           status: item?.status?.S ?? "N/A",
           profile: {
-            position: item?.position?.S?.replace("'", "`"),
+            position: item?.position?.S?.replaceAll("'", "`"),
             phone: item?.phone?.S,
-          },
-          studentKeys: "",
+          }
         };
       }
       // If the condition is not met, return undefined
@@ -71,7 +70,7 @@ const mapperFunction = (data, fs) => {
 
   fs.writeFileSync(
     join(__dirname, "../logs/data.mjs"),
-    `export default ${JSON.stringify(removedValuePrefix)}`,
+    `export default ${JSON.stringify(removedValuePrefix)}`
   );
 };
 
