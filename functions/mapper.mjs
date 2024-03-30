@@ -38,13 +38,14 @@ const mapperFunction = (data, fs) => {
   const __dirname = dirname(__filename);
 
   const removedItemName = data.map((item) => item.Item);
-  // fs.writeFileSync("./log/dynamo-logs.js", JSON.stringify(removedItemName));
+  const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
+
   const removedValuePrefix = removedItemName
     .map((item) => {
       if (!item.hasOwnProperty("schoolId")) {
         return {
           tableName: "student",
-          schoolId: isUUID(item.organizationId?.S),
+          schoolId: ibfProdSchoolId,
           campusId: "",
           idCard: idCardHandler(item.idCard?.S),
           firstName: item.firstName?.S ?? "N/A",
@@ -58,7 +59,7 @@ const mapperFunction = (data, fs) => {
           profile: {
             position: item?.position?.S?.replaceAll("'", "`"),
             phone: item?.phone?.S,
-          }
+          },
         };
       }
       // If the condition is not met, return undefined
