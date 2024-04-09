@@ -20,6 +20,29 @@ export const dobHandlder = (item) => {
   }
 };
 
+export const fullNameHandler = (item) => {
+  if (!item) return "N/A"
+  const sentence = item;
+  const firstSpaceIndex = sentence.indexOf(" ");
+
+  // Get the part up to and including the first space
+  const firstValue =
+    firstSpaceIndex !== -1
+      ? sentence.substring(0, firstSpaceIndex + 1)
+      : sentence;
+
+  // Get the rest of the sentence after the first space, or "employer" if there's no space
+  const restOfSentence =
+    firstSpaceIndex !== -1
+      ? sentence.substring(firstSpaceIndex + 1)
+      : "employer";
+
+  return {
+    firstName: firstValue,
+    lastName: restOfSentence,
+  };
+};
+
 export const startDateHandler = (item) => {
   let response = null;
   if (item.hasOwnProperty("NULL")) {

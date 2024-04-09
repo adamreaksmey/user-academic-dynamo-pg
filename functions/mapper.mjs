@@ -29,6 +29,7 @@ import {
   idCardHandler,
   startDateHandler,
   isUUID,
+  fullNameHandler
 } from "./operations/data.mjs";
 import { randomUUID } from 'crypto';
 
@@ -48,8 +49,8 @@ const mapperFunction = (data, fs) => {
           tableName: "guardian",
           guardianId: randomUUID(),
           schoolId: ibfProdSchoolId,
-          firstName: item.employer?.S || "N/A",
-          lastName: item.employer?.S || "N/A",
+          firstName: fullNameHandler(item.employer?.S)?.firstName || "N/A",
+          lastName: fullNameHandler(item.employer?.S)?.lastName || "N/A",
           email: `employer${index}@gmail.com`,
           userName: `employer${index}`
         };
