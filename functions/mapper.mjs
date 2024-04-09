@@ -30,6 +30,7 @@ import {
   startDateHandler,
   isUUID,
 } from "./operations/data.mjs";
+import { randomUUID } from 'crypto';
 
 const mapperFunction = (data, fs) => {
   console.log("-- mapping file data --");
@@ -41,25 +42,16 @@ const mapperFunction = (data, fs) => {
   const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
 
   const removedValuePrefix = removedItemName
-    .map((item) => {
+    .map((item, index) => {
       if (!item.hasOwnProperty("schoolId")) {
         return {
-          tableName: "student",
+          tableName: "guardian",
+          guardianId: randomUUID(),
           schoolId: ibfProdSchoolId,
-          campusId: "",
-          idCard: idCardHandler(item.idCard?.S),
-          firstName: item.firstName?.S ?? "N/A",
-          lastName: item.lastName?.S ?? "N/A",
-          firstNameNative: item.firstName?.S ?? "",
-          lastNameNative: item.lastName?.S ?? "",
-          gender: item.gender?.S?.toLowerCase() ?? "",
-          dob: dobHandlder(item) ?? "",
-          remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
-          status: item?.status?.S ?? "N/A",
-          profile: {
-            position: item?.position?.S?.replaceAll("'", "`"),
-            phone: item?.phone?.S,
-          },
+          firstName: item.employer?.S || "N/A",
+          lastName: item.employer?.S || "N/A",
+          email: `employer${index}@gmail.com`,
+          userName: `employer${index}`
         };
       }
       // If the condition is not met, return undefined
