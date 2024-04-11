@@ -45,7 +45,7 @@ const mapperFunction = (data, fs) => {
           lastName: fullName.lastName || "N/A",
           email: `employer${index}@gmail.com`,
           userName: `employer${index}`,
-          employerName, // Added this line to use it in the filter step
+          employerName,
         };
       }
       // If the condition is not met, return undefined
