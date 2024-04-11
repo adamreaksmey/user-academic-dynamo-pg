@@ -70,6 +70,52 @@ const mapperFunction = (data, fs) => {
       return data;
     });
 
+  const students = removedItemName
+    .map((item) => {
+      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+        return {
+          tableName: "student",
+          studentId: item.userId?.S,
+          schoolId: ibfProdSchoolId,
+          idCard: idCardHandler(item.idCard?.S),
+          firstName: item.firstName?.S ?? "N/A",
+          lastName: item.lastName?.S ?? "N/A",
+          firstNameNative: item.firstName?.S ?? "",
+          lastNameNative: item.lastName?.S ?? "",
+          gender: item.gender?.S?.toLowerCase() ?? "",
+          dob: dobHandlder(item) ?? "",
+          remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
+          status: item?.status?.S ?? "start",
+          profile: {
+            position: item?.position?.S?.replaceAll("'", "`"),
+            phone: item?.phone?.S,
+          },
+          uniqueKey: idCardHandler(item.idCard?.S),
+        };
+      }
+
+      if (!item.idCard?.S) {
+        usersWithNoIdCard.push(item);
+      }
+      // If the condition is not met, return undefined
+      return undefined;
+    })
+    .filter((item) => item !== undefined);
+
+
+    const student_guardian = removedItemName.map((item) => {
+      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+
+      }
+    })
+
+  // students
+  fs.writeFileSync(
+    join(__dirname, "../logs/academic/students.mjs"),
+    `export default ${JSON.stringify(students)}`
+  );
+
+  // guardians
   fs.writeFileSync(
     join(__dirname, "../logs/data.mjs"),
     `export default ${JSON.stringify(guardians)}`
