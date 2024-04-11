@@ -29,7 +29,7 @@ const mapperFunction = (data, fs) => {
   const removedItemName = data.map((item) => item.Item);
   const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
 
-  const removedValuePrefix = removedItemName
+  const guardians = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
         // Extract employer name or default to "N/A"
@@ -53,7 +53,7 @@ const mapperFunction = (data, fs) => {
     })
     .filter((item) => item !== undefined)
     .filter(
-      (function () {
+      (() => {
         const seenEmployers = new Set();
         return function (item) {
           if (!seenEmployers.has(item.employerName)) {
@@ -72,7 +72,7 @@ const mapperFunction = (data, fs) => {
 
   fs.writeFileSync(
     join(__dirname, "../logs/data.mjs"),
-    `export default ${JSON.stringify(removedValuePrefix)}`
+    `export default ${JSON.stringify(guardians)}`
   );
 };
 
