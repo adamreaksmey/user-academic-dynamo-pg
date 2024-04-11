@@ -9,19 +9,6 @@ import { dirname, join } from "path";
  * @param {*} questions
  * @param {*} answers
  *
- * studentId: no need, auto generated
- * schoolId: organizationId
- * campusId: null ( until created )
- * idCard: idCard
- * firstName: firstName
- * lastName: lastName
- * firstNameNative: firstName
- * lastNameNative: lastName
- * gender: smallCase(gender)
- * dob: dob || date_of_birth
- * remark: remark
- * status: status
- *
  */
 
 import {
@@ -29,9 +16,9 @@ import {
   idCardHandler,
   startDateHandler,
   isUUID,
-  fullNameHandler
+  fullNameHandler,
 } from "./operations/data.mjs";
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 const mapperFunction = (data, fs) => {
   console.log("-- mapping file data --");
@@ -44,23 +31,44 @@ const mapperFunction = (data, fs) => {
 
   const removedValuePrefix = removedItemName
     .map((item, index) => {
-      if (!item.hasOwnProperty("schoolId")) {
+      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+        // Extract employer name or default to "N/A"
+        const employerName = item.employer?.S || "N/A";
+        const fullName = fullNameHandler(employerName) || {};
+
+        // Return an object that includes the employerName for later filtering
         return {
           tableName: "guardian",
           guardianId: randomUUID(),
           schoolId: ibfProdSchoolId,
-          firstName: fullNameHandler(item.employer?.S)?.firstName || "N/A",
-          lastName: fullNameHandler(item.employer?.S)?.lastName || "N/A",
+          firstName: fullName.firstName || "N/A",
+          lastName: fullName.lastName || "N/A",
           email: `employer${index}@gmail.com`,
-          userName: `employer${index}`
+          userName: `employer${index}`,
+          employerName, // Added this line to use it in the filter step
         };
       }
       // If the condition is not met, return undefined
       return undefined;
     })
-    .filter((item) => item !== undefined);
-
-  // console.log(removedValuePrefix);
+    .filter((item) => item !== undefined)
+    .filter(
+      (function () {
+        const seenEmployers = new Set();
+        return function (item) {
+          if (!seenEmployers.has(item.employerName)) {
+            seenEmployers.add(item.employerName);
+            return true;
+          }
+          return false;
+        };
+      })()
+    )
+    .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A")
+    .map((data) => {
+      delete data.employerName;
+      return data;
+    });
 
   fs.writeFileSync(
     join(__dirname, "../logs/data.mjs"),
