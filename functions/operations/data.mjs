@@ -1,7 +1,7 @@
 import moment from "moment";
 
 export const variousDateHandler = (date) => {
-  console.log('dob handling')
+  if (!date) return null;
   return moment(date).format("YYYY-MM-DD");
 };
 

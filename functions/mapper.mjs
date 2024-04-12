@@ -1,5 +1,7 @@
 import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
+import _courses from "../logs/lms/courses.mjs";
+import { UUID } from "crypto";
 
 /**
  *
@@ -28,12 +30,13 @@ const mapperFunction = (data, fs) => {
 
   const removedItemName = data.map((item) => item.Item);
   const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
+  const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
 
   const guardians = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
         // Extract employer name or default to "N/A"
-        const employerName = item.employer?.S || "N/A";
+        const employerName = item.employer?.S?.trim() || "N/A";
         const fullName = fullNameHandler(employerName) || {};
 
         // Return an object that includes the employerName for later filtering
@@ -66,37 +69,95 @@ const mapperFunction = (data, fs) => {
     )
     .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A");
 
+  const courses = removedItemName
+    .map((item, index) => {
+      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+        return item?.courses?.L?.map((data, index) => {
+          // console.log(
+          //   "FOUND =>",
+          //   _courses.find(
+          //     (_data) => _data.title.trim() == data.M.title.S.trim()
+          //   )
+          // );
+          return {
+            organizationId: ibfProdSchoolId,
+            title: data.M.title.S || "N/A",
+            studentId: item.userId?.S,
+            groupStructureId: _courses.find(
+              (_data) => _data?.title?.trim() == data?.M?.title?.S?.trim()
+            )?.groupStructureId,
+            structureRecordId: _courses.find(
+              (_data) => _data?.title?.trim() == data?.M?.title?.S?.trim()
+            )?.structureRecordId,
+          };
+        });
+      }
+      return undefined;
+    })
+    .filter((item) => item !== undefined)
+    .flat();
+
   const students = removedItemName
     .map((item) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
-        return {
-          tableName: "student",
-          studentId: item.userId?.S,
-          schoolId: ibfProdSchoolId,
-          idCard: idCardHandler(item.idCard?.S),
-          firstName: item.firstName?.S ?? "N/A",
-          lastName: item.lastName?.S ?? "N/A",
-          firstNameNative: item.firstName?.S ?? "",
-          lastNameNative: item.lastName?.S ?? "",
-          gender: item.gender?.S?.toLowerCase() ?? "",
-          dob: dobHandlder(item) ?? "",
-          remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
-          status: item?.status?.S ?? "start",
-          profile: {
-            position: item?.position?.S?.replaceAll("'", "`"),
-            phone: item?.phone?.S,
-          },
-          uniqueKey: idCardHandler(item.idCard?.S),
-        };
-      }
+        const foundCourses = courses.filter(
+          (data) => data.studentId == item.userId?.S
+        );
 
-      if (!item.idCard?.S) {
-        usersWithNoIdCard.push(item);
+        // if (foundCourses.length > 1)
+        //   console.log("found more than 2", foundCourses);
+
+        // Handle multiple courses
+        if (foundCourses.length > 1) {
+          return foundCourses.map((course) => ({
+            tableName: "student",
+            studentId: item.userId?.S,
+            schoolId: ibfProdSchoolId,
+            idCard: idCardHandler(item.idCard?.S),
+            firstName: item.firstName?.S ?? "N/A",
+            lastName: item.lastName?.S ?? "N/A",
+            firstNameNative: item.firstName?.S ?? "",
+            lastNameNative: item.lastName?.S ?? "",
+            gender: item.gender?.S?.toLowerCase() ?? "",
+            dob: dobHandlder(item),
+            remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
+            status: item?.status?.S ?? "start",
+            profile: {
+              position: item?.position?.S?.replaceAll("'", "`"),
+              phone: item?.phone?.S,
+            },
+            uniqueKey: idCardHandler(item.idCard?.S),
+            groupStructureId: course.groupStructureId,
+            structureRecordId: course.structureRecordId,
+          }));
+        } else {
+          return {
+            tableName: "student",
+            studentId: item.userId?.S,
+            schoolId: ibfProdSchoolId,
+            idCard: idCardHandler(item.idCard?.S),
+            firstName: item.firstName?.S ?? "N/A",
+            lastName: item.lastName?.S ?? "N/A",
+            firstNameNative: item.firstName?.S ?? "",
+            lastNameNative: item.lastName?.S ?? "",
+            gender: item.gender?.S?.toLowerCase() ?? "",
+            dob: dobHandlder(item),
+            remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
+            status: item?.status?.S ?? "start",
+            profile: {
+              position: item?.position?.S?.replaceAll("'", "`"),
+              phone: item?.phone?.S,
+            },
+            uniqueKey: idCardHandler(item.idCard?.S),
+            groupStructureId: null,
+            structureRecordId: null,
+          };
+        }
       }
-      // If the condition is not met, return undefined
       return undefined;
     })
-    .filter((item) => item !== undefined);
+    .filter((item) => item !== undefined)
+    .flat();
 
   const student_guardian = removedItemName
     .map((item) => {
@@ -139,7 +200,7 @@ const mapperFunction = (data, fs) => {
             userName: item.userName?.S || `${item.firstName?.S}.${index}`,
           },
           email: item.email?.S || "N/A",
-          dob: dobHandlder(item) ?? "",
+          dob: dobHandlder(item),
           remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
           uniqueKey: idCardHandler(item.idCard?.S),
           examinations: [""],
@@ -149,23 +210,6 @@ const mapperFunction = (data, fs) => {
       return undefined;
     })
     .filter((item) => item !== undefined);
-
-  const courses = removedItemName
-    .map((item, index) => {
-      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
-        return item?.courses?.L?.map((data, index) => {
-          return {
-            organizationId: ibfProdSchoolId,
-            title: data.M.title.S || "N/A",
-          };
-        });
-      }
-      return undefined;
-    })
-    .filter((item) => item !== undefined)
-    .flat();
-
-  console.log("COURSES", courses);
 
   // student_guardian
   fs.writeFileSync(
@@ -194,12 +238,6 @@ const mapperFunction = (data, fs) => {
   fs.writeFileSync(
     join(__dirname, "../logs/lms/users.mjs"),
     `export default ${JSON.stringify(lms_users)}`
-  );
-
-  // courses
-  fs.writeFileSync(
-    join(__dirname, "../logs/lms/courses.mjs"),
-    `export default ${JSON.stringify(courses)}`
   );
 };
 
