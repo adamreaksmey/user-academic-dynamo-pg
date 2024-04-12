@@ -92,7 +92,30 @@ const main = async (__filename, __dirname) => {
 
   console.log(
     "\x1b[33m%s\x1b[0m",
-    "--- Guard Students junction HAVE BEEN GENERATED ---"
+    "--- Guardian Students junction HAVE BEEN GENERATED ---"
+  );
+
+  /**
+   * LMS USERS
+   */
+  modulePath = join(__dirname, "./logs/lms/users.mjs");
+  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
+  const allData_lms_users = await import(uniqueUrl);
+
+  const qResponse_lms_users = insert_data(allData_lms_users.default);
+  const outputPath_lms_users = "./generated_sql/lms-service/users.sql";
+  sqlFileOutPutGenerator(
+    qResponse_lms_users,
+    __dirname,
+    fs,
+    path,
+    join,
+    outputPath_lms_users
+  );
+
+  console.log(
+    "\x1b[33m%s\x1b[0m",
+    "--- LMS users junction HAVE BEEN GENERATED ---"
   );
 
   console.log("SQL file generated successfully.");

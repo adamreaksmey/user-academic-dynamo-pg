@@ -19,7 +19,7 @@ const insert_data = (data) => {
     });
 
     // Build the query
-    let query = `INSERT INTO ${item.tableName} (${columns
+    let query = `INSERT INTO public.${item.tableName} (${columns
       .map((column) => `"${column}"`)
       .join(", ")}) VALUES (${values
       .map((value) => (value === "''" ? "NULL" : value))

@@ -65,10 +65,6 @@ const mapperFunction = (data, fs) => {
       })()
     )
     .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A");
-  // .map((data) => {
-  //   delete data.employerName;
-  //   return data;
-  // });
 
   const students = removedItemName
     .map((item) => {
@@ -118,6 +114,59 @@ const mapperFunction = (data, fs) => {
     })
     .filter((item) => item !== undefined && item.guardianId);
 
+  const lms_users = removedItemName
+    .map((item, index) => {
+      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+        return {
+          tableName: "user",
+          organizationId: ibfProdSchoolId,
+          userId: item.userId?.S,
+          studentId: item.userId?.S,
+          firstName: item.firstName?.S ?? "N/A",
+          lastName: item.lastName?.S ?? "N/A",
+          firstNameNative: item.firstName?.S ?? "",
+          lastNameNative: item.lastName?.S ?? "",
+          idCard: idCardHandler(item.idCard?.S),
+          gender: item.gender?.S?.toLowerCase() ?? "",
+          phone: item?.phone?.S,
+          employer: item.employer?.S,
+          userName: item.userName?.S || `${item.firstName?.S}.${index}`,
+          position: item.position?.S,
+          department: [item.department?.S || "N/A"],
+          profile: {
+            email: item.email?.S || "N/A",
+            phone: item?.phone?.S,
+            userName: item.userName?.S || `${item.firstName?.S}.${index}`,
+          },
+          email: item.email?.S || "N/A",
+          dob: dobHandlder(item) ?? "",
+          remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
+          uniqueKey: idCardHandler(item.idCard?.S),
+          examinations: [""],
+        };
+      }
+
+      return undefined;
+    })
+    .filter((item) => item !== undefined);
+
+  const courses = removedItemName
+    .map((item, index) => {
+      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+        return item?.courses?.L?.map((data, index) => {
+          return {
+            organizationId: ibfProdSchoolId,
+            title: data.M.title.S || "N/A",
+          };
+        });
+      }
+      return undefined;
+    })
+    .filter((item) => item !== undefined)
+    .flat();
+
+  console.log("COURSES", courses);
+
   // student_guardian
   fs.writeFileSync(
     join(__dirname, "../logs/academic/guardian_student.mjs"),
@@ -139,6 +188,18 @@ const mapperFunction = (data, fs) => {
         return data;
       })
     )}`
+  );
+
+  // users
+  fs.writeFileSync(
+    join(__dirname, "../logs/lms/users.mjs"),
+    `export default ${JSON.stringify(lms_users)}`
+  );
+
+  // courses
+  fs.writeFileSync(
+    join(__dirname, "../logs/lms/courses.mjs"),
+    `export default ${JSON.stringify(courses)}`
   );
 };
 

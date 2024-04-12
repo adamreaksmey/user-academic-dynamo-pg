@@ -1,5 +1,10 @@
 import moment from "moment";
 
+export const variousDateHandler = (date) => {
+  console.log('dob handling')
+  return moment(date).format("YYYY-MM-DD");
+};
+
 export const dobHandlder = (item) => {
   let response = null;
   try {
