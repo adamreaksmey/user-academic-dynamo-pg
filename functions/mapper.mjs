@@ -31,6 +31,9 @@ const mapperFunction = (data, fs) => {
   const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
   const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
 
+  /**
+   *  ACADEMIC SERVICE
+   */
   const guardians = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -68,6 +71,9 @@ const mapperFunction = (data, fs) => {
     )
     .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A");
 
+  /**
+   *  LMS SERVICE
+   */
   const courses = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -90,74 +96,75 @@ const mapperFunction = (data, fs) => {
     .filter((item) => item !== undefined)
     .flat();
 
-  const students = removedItemName
-    .map((item) => {
-      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
-        const foundCourses = courses.filter(
-          (data) => data.studentId == item.userId?.S
-        );
+  /**
+   *  ACADEMIC SERVICE
+   */
+  const courseLookup = courses.reduce((acc, course) => {
+    if (!acc[course.studentId]) {
+      acc[course.studentId] = [];
+    }
+    acc[course.studentId].push(course);
+    return acc;
+  }, {});
 
-        if (foundCourses.length > 1)
-          console.log("found more than 2", foundCourses);
+  const students = removedItemName.reduce((result, item) => {
+    if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+      const foundCourses = courseLookup[item.userId?.S] || [];
 
-        // Handle multiple courses
-        if (foundCourses.length > 1) {
-          return foundCourses.map((course, index) => ({
-            tableName: "student",
-            studentId: index == 0 ? item.userId?.S : randomUUID(),
-            schoolId: ibfProdSchoolId,
-            idCard: idCardHandler(item.idCard?.S),
-            firstName: item.firstName?.S ?? "N/A",
-            lastName: item.lastName?.S ?? "N/A",
-            firstNameNative: item.firstName?.S ?? "",
-            lastNameNative: item.lastName?.S ?? "",
-            gender: item.gender?.S?.toLowerCase() ?? "",
-            dob: dobHandlder(item),
-            remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
-            status: item?.status?.S ?? "start",
-            profile: {
-              position: item?.position?.S?.replaceAll("'", "`"),
-              phone: item?.phone?.S,
-            },
-            uniqueKey: idCardHandler(item.idCard?.S),
+      if (foundCourses.length > 1)
+        console.log("Found user with more than 1 course", foundCourses);
+
+      // Prepare reusable data
+      const baseData = {
+        tableName: "student",
+        studentId: item.userId?.S,
+        schoolId: ibfProdSchoolId,
+        idCard: idCardHandler(item.idCard?.S),
+        firstName: item.firstName?.S ?? "N/A",
+        lastName: item.lastName?.S ?? "N/A",
+        firstNameNative: item.firstName?.S ?? "",
+        lastNameNative: item.lastName?.S ?? "",
+        gender: item.gender?.S?.toLowerCase() ?? "",
+        dob: dobHandlder(item),
+        remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
+        status: item?.status?.S ?? "start",
+        profile: {
+          position: item?.position?.S?.replaceAll("'", "`"),
+          phone: item?.phone?.S,
+        },
+        uniqueKey: idCardHandler(item.idCard?.S),
+        campusId: ibfCampusId,
+      };
+
+      // Handle multiple courses
+      if (foundCourses.length > 1) {
+        foundCourses.forEach((course, index) => {
+          result.push({
+            ...baseData,
+            studentId: index === 0 ? item.userId?.S : randomUUID(),
             groupStructureId: course.groupStructureId,
             structureRecordId: course.structureRecordId,
-            campusId: ibfCampusId,
-          }));
-        } else {
-          return {
-            tableName: "student",
-            studentId: item.userId?.S,
-            schoolId: ibfProdSchoolId,
-            idCard: idCardHandler(item.idCard?.S),
-            firstName: item.firstName?.S ?? "N/A",
-            lastName: item.lastName?.S ?? "N/A",
-            firstNameNative: item.firstName?.S ?? "",
-            lastNameNative: item.lastName?.S ?? "",
-            gender: item.gender?.S?.toLowerCase() ?? "",
-            dob: dobHandlder(item),
-            remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
-            status: item?.status?.S ?? "start",
-            profile: {
-              position: item?.position?.S?.replaceAll("'", "`"),
-              phone: item?.phone?.S,
-            },
-            uniqueKey: idCardHandler(item.idCard?.S),
-            groupStructureId: courses.find(
-              (data) => data.studentId == item.userId?.S
-            )?.groupStructureId,
-            structureRecordId: courses.find(
-              (data) => data.studentId == item.userId?.S
-            )?.structureRecordId,
-            campusId: ibfCampusId,
-          };
-        }
+          });
+        });
+      } else if (foundCourses.length === 1) {
+        result.push({
+          ...baseData,
+          groupStructureId: courses.find(
+            (data) => data.studentId == item.userId?.S
+          )?.groupStructureId,
+          structureRecordId: courses.find(
+            (data) => data.studentId == item.userId?.S
+          )?.structureRecordId,
+          campusId: ibfCampusId,
+        });
       }
-      return undefined;
-    })
-    .filter((item) => item !== undefined)
-    .flat();
+    }
+    return result;
+  }, []);
 
+  /**
+   *  ACADEMIC SERVICE
+   */
   const student_guardian = removedItemName
     .map((item) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -174,6 +181,9 @@ const mapperFunction = (data, fs) => {
     })
     .filter((item) => item !== undefined && item.guardianId);
 
+  /**
+   *  LMS SERVICE
+   */
   const lms_users = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -202,7 +212,15 @@ const mapperFunction = (data, fs) => {
           dob: dobHandlder(item),
           remark: [item?.remark?.S?.replaceAll("'", "`") ?? ""],
           uniqueKey: idCardHandler(item.idCard?.S),
-          examinations: [""],
+          examinations: item?.examinations?.L?.map((exam, index) => {
+            return {
+              organizationId: exam.M?.organizationId?.S,
+              name: exam.M?.name?.S,
+              endDate: exam.M?.endDate?.S,
+              subjectId: exam.M?.subjectId?.S,
+              startDate: exam.M?.startDate?.S,
+            };
+          }),
         };
       }
 
@@ -210,6 +228,9 @@ const mapperFunction = (data, fs) => {
     })
     .filter((item) => item !== undefined);
 
+  /**
+   *  ACADEMIC SERVICE
+   */
   const subjects = _courses.map((item, index) => {
     return {
       tableName: "subject",
@@ -223,6 +244,12 @@ const mapperFunction = (data, fs) => {
       lmsCourseId: item.lmsCourseId,
     };
   });
+
+  /**
+   *  LMS SERVICE
+   */
+
+  // const lms_course_users = 
 
   // student_guardian
   fs.writeFileSync(
