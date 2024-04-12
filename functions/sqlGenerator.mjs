@@ -4,7 +4,7 @@ const insert_data = (data) => {
   for (let item of data) {
     // Prepare column names and values
     let columns = Object.keys(item).filter(
-      (key) => key !== "tableName" && key !== "recordType",
+      (key) => key !== "tableName" && key !== "recordType"
     );
     let values = columns.map((column) => {
       let value = item[column];
@@ -29,15 +29,19 @@ const insert_data = (data) => {
   return queries;
 };
 
-const sqlFileOutPutGenerator = (qResponse, __dirname, fs, path, join) => {
-  const filePath = path.join(
-    __dirname,
-    "./generated_sql/migration_queries.sql",
-  );
+const sqlFileOutPutGenerator = (
+  qResponse,
+  __dirname,
+  fs,
+  path,
+  join,
+  outputPath
+) => {
+  const filePath = path.join(__dirname, outputPath);
   try {
     fs.writeFileSync(
-      join(__dirname, `./generated_sql/migration_queries.sql`),
-      qResponse.join("\n"),
+      join(__dirname, outputPath),
+      qResponse.join("\n")
     );
   } catch (error) {
     if (error.code === "ENOENT") {

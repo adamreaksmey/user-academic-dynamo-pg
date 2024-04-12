@@ -35,12 +35,65 @@ const main = async (__filename, __dirname) => {
 
   // Import again with a new unique URL to get the updated module
   console.log("-- re-importing --");
+
+  /**
+   * Guardians
+   */
   modulePath = join(__dirname, "./logs/data.mjs");
   uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
   const allData = await import(uniqueUrl);
 
   const qResponse = insert_data(allData.default);
-  sqlFileOutPutGenerator(qResponse, __dirname, fs, path, join);
+  const outputPath = "./generated_sql/academic-service/guardians.sql";
+  sqlFileOutPutGenerator(qResponse, __dirname, fs, path, join, outputPath);
+
+  console.log("\x1b[36m%s\x1b[0m", "--- GUARDIANS HAVE BEEN GENERATED ---");
+
+  /**
+   * Students ( mapped )
+   */
+  modulePath = join(__dirname, "./logs/academic/students.mjs");
+  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
+  const allData_students = await import(uniqueUrl);
+
+  const qResponse_students = insert_data(allData_students.default);
+  const outputPath_students = "./generated_sql/academic-service/students.sql";
+  sqlFileOutPutGenerator(
+    qResponse_students,
+    __dirname,
+    fs,
+    path,
+    join,
+    outputPath_students
+  );
+
+  console.log("\x1b[36m%s\x1b[0m", "--- STUDENTS HAVE BEEN GENERATED ---");
+
+  /**
+   * Guard Students junction table ( mapped )
+   */
+  modulePath = join(__dirname, "./logs/academic/guardian_student.mjs");
+  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
+  const allData_students_guardian = await import(uniqueUrl);
+
+  const qResponse_students_guardian = insert_data(
+    allData_students_guardian.default
+  );
+  const outputPath_students_guardian =
+    "./generated_sql/academic-service/guardian_student.sql";
+  sqlFileOutPutGenerator(
+    qResponse_students_guardian,
+    __dirname,
+    fs,
+    path,
+    join,
+    outputPath_students_guardian
+  );
+
+  console.log(
+    "\x1b[33m%s\x1b[0m",
+    "--- Guard Students junction HAVE BEEN GENERATED ---"
+  );
 
   console.log("SQL file generated successfully.");
 };

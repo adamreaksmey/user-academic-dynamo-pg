@@ -64,11 +64,11 @@ const mapperFunction = (data, fs) => {
         };
       })()
     )
-    .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A")
-    .map((data) => {
-      delete data.employerName;
-      return data;
-    });
+    .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A");
+  // .map((data) => {
+  //   delete data.employerName;
+  //   return data;
+  // });
 
   const students = removedItemName
     .map((item) => {
@@ -102,12 +102,27 @@ const mapperFunction = (data, fs) => {
     })
     .filter((item) => item !== undefined);
 
-
-    const student_guardian = removedItemName.map((item) => {
+  const student_guardian = removedItemName
+    .map((item) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
-
+        return {
+          tableName: "guardian_student",
+          studentId: item.userId?.S,
+          guardianId:
+            guardians.find((data) => data.employerName == item.employer?.S)
+              ?.guardianId || null,
+        };
       }
+
+      return undefined;
     })
+    .filter((item) => item !== undefined && item.guardianId);
+
+  // student_guardian
+  fs.writeFileSync(
+    join(__dirname, "../logs/academic/guardian_student.mjs"),
+    `export default ${JSON.stringify(student_guardian)}`
+  );
 
   // students
   fs.writeFileSync(
@@ -118,7 +133,12 @@ const mapperFunction = (data, fs) => {
   // guardians
   fs.writeFileSync(
     join(__dirname, "../logs/data.mjs"),
-    `export default ${JSON.stringify(guardians)}`
+    `export default ${JSON.stringify(
+      guardians.map((data) => {
+        delete data.employerName;
+        return data;
+      })
+    )}`
   );
 };
 

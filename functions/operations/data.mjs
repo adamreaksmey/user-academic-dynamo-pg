@@ -21,7 +21,7 @@ export const dobHandlder = (item) => {
 };
 
 export const fullNameHandler = (item) => {
-  if (!item) return "N/A"
+  if (!item) return "N/A";
   const sentence = item;
   const firstSpaceIndex = sentence.indexOf(" ");
 
@@ -75,4 +75,17 @@ export const isUUID = (value) => {
   const isUUID = uuidPattern.test(value);
   if (isUUID) return value;
   return "b740450d-a05d-4e1d-a235-1d507702f30d";
+};
+
+export const updateUserByName = (usersArray, name, newDetails) => {
+  const index = usersArray.findIndex((user) => user.name === name);
+
+  // Check if the user was found
+  if (index !== -1) {
+    // Update the user's details with newDetails
+    usersArray[index] = { ...usersArray[index], ...newDetails };
+    return true; // Return true to indicate success
+  }
+
+  return false; // Return false if the user was not found
 };
