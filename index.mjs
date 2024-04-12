@@ -118,6 +118,29 @@ const main = async (__filename, __dirname) => {
     "--- LMS users junction HAVE BEEN GENERATED ---"
   );
 
+  /**
+   *  ACADEMIC SUBJECTS
+   */
+  modulePath = join(__dirname, "./logs/academic/subjects.mjs");
+  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
+  const allData_subjects = await import(uniqueUrl);
+
+  const qResponse_subjects = insert_data(allData_subjects.default);
+  const outputPath_subjects = "./generated_sql/academic-service/subjects.sql";
+  sqlFileOutPutGenerator(
+    qResponse_subjects,
+    __dirname,
+    fs,
+    path,
+    join,
+    outputPath_subjects
+  );
+
+  console.log(
+    "\x1b[33m%s\x1b[0m",
+    "--- LMS users junction HAVE BEEN GENERATED ---"
+  );
+
   console.log("SQL file generated successfully.");
 };
 

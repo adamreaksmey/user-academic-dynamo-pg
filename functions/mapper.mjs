@@ -1,7 +1,6 @@
 import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
 import _courses from "../logs/lms/courses.mjs";
-import { UUID } from "crypto";
 
 /**
  *
@@ -73,12 +72,6 @@ const mapperFunction = (data, fs) => {
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
         return item?.courses?.L?.map((data, index) => {
-          // console.log(
-          //   "FOUND =>",
-          //   _courses.find(
-          //     (_data) => _data.title.trim() == data.M.title.S.trim()
-          //   )
-          // );
           return {
             organizationId: ibfProdSchoolId,
             title: data.M.title.S || "N/A",
@@ -104,14 +97,14 @@ const mapperFunction = (data, fs) => {
           (data) => data.studentId == item.userId?.S
         );
 
-        // if (foundCourses.length > 1)
-        //   console.log("found more than 2", foundCourses);
+        if (foundCourses.length > 1)
+          console.log("found more than 2", foundCourses);
 
         // Handle multiple courses
         if (foundCourses.length > 1) {
-          return foundCourses.map((course) => ({
+          return foundCourses.map((course, index) => ({
             tableName: "student",
-            studentId: item.userId?.S,
+            studentId: index == 0 ? item.userId?.S : randomUUID(),
             schoolId: ibfProdSchoolId,
             idCard: idCardHandler(item.idCard?.S),
             firstName: item.firstName?.S ?? "N/A",
@@ -129,6 +122,7 @@ const mapperFunction = (data, fs) => {
             uniqueKey: idCardHandler(item.idCard?.S),
             groupStructureId: course.groupStructureId,
             structureRecordId: course.structureRecordId,
+            campusId: ibfCampusId,
           }));
         } else {
           return {
@@ -149,8 +143,13 @@ const mapperFunction = (data, fs) => {
               phone: item?.phone?.S,
             },
             uniqueKey: idCardHandler(item.idCard?.S),
-            groupStructureId: null,
-            structureRecordId: null,
+            groupStructureId: courses.find(
+              (data) => data.studentId == item.userId?.S
+            )?.groupStructureId,
+            structureRecordId: courses.find(
+              (data) => data.studentId == item.userId?.S
+            )?.structureRecordId,
+            campusId: ibfCampusId,
           };
         }
       }
@@ -196,7 +195,7 @@ const mapperFunction = (data, fs) => {
           department: [item.department?.S || "N/A"],
           profile: {
             email: item.email?.S || "N/A",
-            phone: item?.phone?.S,
+            phone: item?.phone?.S || "N/A",
             userName: item.userName?.S || `${item.firstName?.S}.${index}`,
           },
           email: item.email?.S || "N/A",
@@ -210,6 +209,20 @@ const mapperFunction = (data, fs) => {
       return undefined;
     })
     .filter((item) => item !== undefined);
+
+  const subjects = _courses.map((item, index) => {
+    return {
+      tableName: "subject",
+      schoolId: ibfProdSchoolId,
+      campusId: ibfCampusId,
+      groupStructureId: item.groupStructureId,
+      structureRecordId: item.structureRecordId,
+      name: item.title,
+      nameNative: item.title,
+      code: item.code,
+      lmsCourseId: item.lmsCourseId,
+    };
+  });
 
   // student_guardian
   fs.writeFileSync(
@@ -234,10 +247,16 @@ const mapperFunction = (data, fs) => {
     )}`
   );
 
-  // users
+  // lms users
   fs.writeFileSync(
     join(__dirname, "../logs/lms/users.mjs"),
     `export default ${JSON.stringify(lms_users)}`
+  );
+
+  // student_guardian
+  fs.writeFileSync(
+    join(__dirname, "../logs/academic/subjects.mjs"),
+    `export default ${JSON.stringify(subjects)}`
   );
 };
 
