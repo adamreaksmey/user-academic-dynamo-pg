@@ -1,11 +1,13 @@
+import moment from "moment";
+
 export const dobHandlder = (item) => {
   let response = null;
   try {
     if (item) {
-      if (item.hasOwnProperty("date_of_birth")) {
-        response = item?.date_of_birth?.S;
-      } else if (item.hasOwnProperty("dob")) {
-        response = item?.dob?.S;
+      if (Object.prototype.hasOwnProperty.call(item, "date_of_birth")) {
+        response = variousDateHandler(item?.date_of_birth?.S);
+      } else if (Object.prototype.hasOwnProperty.call(item, "dob")) {
+        response = variousDateHandler(item?.dob?.S);
       }
     } else {
       response = false;
