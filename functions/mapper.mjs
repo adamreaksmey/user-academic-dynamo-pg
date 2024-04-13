@@ -30,9 +30,10 @@ const mapperFunction = (data, fs) => {
   const removedItemName = data.map((item) => item.Item);
   const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
   const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
+  // return console.log('current users data', removedItemName.length)
 
   /**
-   *  ACADEMIC SERVICE
+   *  ACADEMIC SERVICE ( GUARDIAN TABLE )
    */
   const guardians = removedItemName
     .map((item, index) => {
@@ -72,7 +73,7 @@ const mapperFunction = (data, fs) => {
     .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A");
 
   /**
-   *  LMS SERVICE
+   *  LMS SERVICE ( COURSES TABLE )
    */
   const courses = removedItemName
     .map((item, index) => {
@@ -88,6 +89,9 @@ const mapperFunction = (data, fs) => {
             structureRecordId: _courses.find(
               (_data) => _data?.title?.trim() == data?.M?.title?.S?.trim()
             )?.structureRecordId,
+            lmsCourseId: _courses.find(
+              (_data) => _data?.title?.trim() == data?.M?.title?.S?.trim()
+            )?.lmsCourseId,
           };
         });
       }
@@ -96,8 +100,10 @@ const mapperFunction = (data, fs) => {
     .filter((item) => item !== undefined)
     .flat();
 
+  console.log(courses);
+
   /**
-   *  ACADEMIC SERVICE
+   *  ACADEMIC SERVICE ( STUDENTS TABLE )
    */
   const courseLookup = courses.reduce((acc, course) => {
     if (!acc[course.studentId]) {
@@ -146,7 +152,7 @@ const mapperFunction = (data, fs) => {
             structureRecordId: course.structureRecordId,
           });
         });
-      } else if (foundCourses.length === 1) {
+      } else if (foundCourses.length <= 1) {
         result.push({
           ...baseData,
           groupStructureId: courses.find(
@@ -163,7 +169,7 @@ const mapperFunction = (data, fs) => {
   }, []);
 
   /**
-   *  ACADEMIC SERVICE
+   *  ACADEMIC SERVICE ( STUDENT_GUARDIAN TABLE)
    */
   const student_guardian = removedItemName
     .map((item) => {
@@ -182,7 +188,7 @@ const mapperFunction = (data, fs) => {
     .filter((item) => item !== undefined && item.guardianId);
 
   /**
-   *  LMS SERVICE
+   *  LMS SERVICE ( USER TABLE )
    */
   const lms_users = removedItemName
     .map((item, index) => {
@@ -221,6 +227,12 @@ const mapperFunction = (data, fs) => {
               startDate: exam.M?.startDate?.S,
             };
           }),
+          guardianId: guardians.find(
+            (_c) => _c.employerName?.trim() == item.employer?.S?.trim()
+          )?.guardianId,
+          guardianName: guardians.find(
+            (_c) => _c.employerName?.trim() == item.employer?.S?.trim()
+          )?.employerName,
         };
       }
 
@@ -229,7 +241,7 @@ const mapperFunction = (data, fs) => {
     .filter((item) => item !== undefined);
 
   /**
-   *  ACADEMIC SERVICE
+   *  ACADEMIC SERVICE ( SUBJECT TABLE )
    */
   const subjects = _courses.map((item, index) => {
     return {
@@ -246,10 +258,44 @@ const mapperFunction = (data, fs) => {
   });
 
   /**
-   *  LMS SERVICE
+   *  LMS SERVICE ( LMS_COURSES_USERS TABLE )
    */
 
-  // const lms_course_users = 
+  const lms_course_users = removedItemName
+    .reduce((result, item) => {
+      const foundCourses = courseLookup[item.userId?.S] || [];
+
+      if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+        // Prepare reusable data
+        const baseData = {
+          tableName: "lms_course_users",
+          organizationId: ibfProdSchoolId,
+          recordType: "enrolluser",
+          status: "start",
+          progress: 0,
+          userProgresses: [],
+        };
+
+        // Handle multiple courses
+        if (foundCourses.length > 1) {
+          foundCourses.forEach((COURSE) => {
+            result.push({
+              ...baseData,
+              courseId: COURSE.lmsCourseId,
+            });
+          });
+        } else if (foundCourses.length <= 1) {
+          result.push({
+            ...baseData,
+            courseId: courses.find((data) => data.studentId == item.userId?.S)
+              ?.lmsCourseId,
+          });
+        }
+      }
+
+      return result;
+    }, [])
+    .filter((item) => item.courseId);
 
   // student_guardian
   fs.writeFileSync(
@@ -280,10 +326,16 @@ const mapperFunction = (data, fs) => {
     `export default ${JSON.stringify(lms_users)}`
   );
 
-  // student_guardian
+  // subjects
   fs.writeFileSync(
     join(__dirname, "../logs/academic/subjects.mjs"),
     `export default ${JSON.stringify(subjects)}`
+  );
+
+  // lms_courses_users
+  fs.writeFileSync(
+    join(__dirname, "../logs/lms/lms_course_users.mjs"),
+    `export default ${JSON.stringify(lms_course_users)}`
   );
 };
 

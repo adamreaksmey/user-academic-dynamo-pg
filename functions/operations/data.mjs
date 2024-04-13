@@ -1,27 +1,16 @@
 import moment from "moment";
 
 export const variousDateHandler = (date) => {
-  if (!date) return null;
   return moment(date).format("YYYY-MM-DD");
 };
 
 export const dobHandlder = (item) => {
-  let response = null;
-  try {
-    if (item) {
-      if (Object.prototype.hasOwnProperty.call(item, "date_of_birth")) {
-        response = variousDateHandler(item?.date_of_birth?.S);
-      } else if (Object.prototype.hasOwnProperty.call(item, "dob")) {
-        response = variousDateHandler(item?.dob?.S);
-      }
-    } else {
-      response = false;
-    }
+  if (!item) return false;
 
-    if (response == "Invalid date") {
-      response = "";
-    }
-    return response;
+  try {
+    const dateOfBirth = item.date_of_birth?.S || item.dob?.S;
+    let response = dateOfBirth ? variousDateHandler(dateOfBirth) : null;
+    return response === "Invalid date" ? "" : response;
   } catch (error) {
     console.log("DOB HANDLER ERROR", error);
   }

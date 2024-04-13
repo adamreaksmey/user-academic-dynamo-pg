@@ -136,9 +136,30 @@ const main = async (__filename, __dirname) => {
     outputPath_subjects
   );
 
+  console.log("\x1b[33m%s\x1b[0m", "--- Subjects HAVE BEEN GENERATED ---");
+
+  /**
+   *  LMS COURSE USER JUNCTION TABLE
+   */
+  modulePath = join(__dirname, "./logs/lms/lms_course_users.mjs");
+  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
+  const allData_course_user = await import(uniqueUrl);
+
+  const qResponse_course_user = insert_data(allData_course_user.default);
+  const outputPath_course_user =
+    "./generated_sql/lms-service/lms_course_users.sql";
+  sqlFileOutPutGenerator(
+    qResponse_course_user,
+    __dirname,
+    fs,
+    path,
+    join,
+    outputPath_course_user
+  );
+
   console.log(
     "\x1b[33m%s\x1b[0m",
-    "--- LMS users junction HAVE BEEN GENERATED ---"
+    "--- LMS USERS COURSES HAVE BEEN GENERATED ---"
   );
 
   console.log("SQL file generated successfully.");
