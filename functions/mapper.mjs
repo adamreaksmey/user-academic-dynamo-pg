@@ -21,6 +21,7 @@ import {
 } from "./operations/data.mjs";
 import { randomUUID } from "crypto";
 
+let usersWithNoIdCard = [];
 const mapperFunction = (data, fs) => {
   console.log("-- mapping file data --");
   // file dirs
@@ -53,6 +54,10 @@ const mapperFunction = (data, fs) => {
           userName: `employer${index}`,
           employerName,
         };
+      }
+
+      if (!item.idCard?.S) {
+        usersWithNoIdCard.push(item);
       }
       // If the condition is not met, return undefined
       return undefined;
