@@ -100,8 +100,6 @@ const mapperFunction = (data, fs) => {
     .filter((item) => item !== undefined)
     .flat();
 
-  console.log(courses);
-
   /**
    *  ACADEMIC SERVICE ( STUDENTS TABLE )
    */
@@ -171,6 +169,7 @@ const mapperFunction = (data, fs) => {
   /**
    *  ACADEMIC SERVICE ( STUDENT_GUARDIAN TABLE)
    */
+  console.log("generating student_guardian");
   const student_guardian = removedItemName
     .map((item) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -190,6 +189,9 @@ const mapperFunction = (data, fs) => {
   /**
    *  LMS SERVICE ( USER TABLE )
    */
+  console.log("generating lms_users");
+  let userNumberId = 32974;
+  
   const lms_users = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -233,6 +235,7 @@ const mapperFunction = (data, fs) => {
           guardianName: guardians.find(
             (_c) => _c.employerName?.trim() == item.employer?.S?.trim()
           )?.employerName,
+          userNumberId: userNumberId++,
         };
       }
 
@@ -243,6 +246,7 @@ const mapperFunction = (data, fs) => {
   /**
    *  ACADEMIC SERVICE ( SUBJECT TABLE )
    */
+  console.log("generating subjects");
   const subjects = _courses.map((item, index) => {
     return {
       tableName: "subject",
@@ -260,36 +264,50 @@ const mapperFunction = (data, fs) => {
   /**
    *  LMS SERVICE ( LMS_COURSES_USERS TABLE )
    */
+  console.log("generating lms_courses_users");
+  const userNumberIdMap = new Map(
+    lms_users.map((user) => [user.userId, user.userNumberId])
+  );
+
+  const courseMap = new Map(
+    courses.map((course) => [course.studentId, course.lmsCourseId])
+  );
+
+  console.log("generating lms_courses_users");
 
   const lms_course_users = removedItemName
     .reduce((result, item) => {
-      const foundCourses = courseLookup[item.userId?.S] || [];
-
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
+        const userNumberId = userNumberIdMap.get(item.userId?.S);
+
         // Prepare reusable data
         const baseData = {
-          tableName: "lms_course_users",
+          tableName: "lms_courses_users",
           organizationId: ibfProdSchoolId,
           recordType: "enrolluser",
           status: "start",
           progress: 0,
           userProgresses: [],
+          userNumberId: userNumberId,
         };
 
-        // Handle multiple courses
-        if (foundCourses.length > 1) {
-          foundCourses.forEach((COURSE) => {
-            result.push({
-              ...baseData,
-              courseId: COURSE.lmsCourseId,
-            });
-          });
-        } else if (foundCourses.length <= 1) {
+        const foundCourses = courseLookup[item.userId?.S] || [];
+        foundCourses.forEach((COURSE) => {
           result.push({
             ...baseData,
-            courseId: courses.find((data) => data.studentId == item.userId?.S)
-              ?.lmsCourseId,
+            courseId: COURSE.lmsCourseId,
           });
+        });
+
+        // Handle case where no or only one course is found using a map lookup
+        if (foundCourses.length <= 1) {
+          const courseId = courseMap.get(item.userId?.S);
+          if (courseId) {
+            result.push({
+              ...baseData,
+              courseId: courseId,
+            });
+          }
         }
       }
 
