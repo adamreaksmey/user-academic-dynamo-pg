@@ -36,6 +36,7 @@ const mapperFunction = (data, fs) => {
   /**
    *  ACADEMIC SERVICE ( GUARDIAN TABLE )
    */
+  console.log("📖: Generating guardian...");
   const guardians = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -76,10 +77,17 @@ const mapperFunction = (data, fs) => {
       })()
     )
     .filter((item) => item.firstName !== "N/A" && item.lastName !== "N/A");
+  console.log("📖: Generating guardian finished...");
+  console.log(
+    "👤: Total numbers of students from user profile: ",
+    removedItemName.length
+  );
+  console.log("👪: Total numbers of guardians found: ", guardians.length);
 
   /**
    *  LMS SERVICE ( COURSES TABLE )
    */
+  console.log("📒: Generating courses...");
   const courses = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -104,10 +112,17 @@ const mapperFunction = (data, fs) => {
     })
     .filter((item) => item !== undefined)
     .flat();
+  console.log("📒: Generating courses finished...");
+  console.log(
+    "👤: Total numbers of students from users profile: ",
+    removedItemName.length
+  );
+  console.log("👪: Total numbers of courses found: ", courses.length);
 
   /**
    *  ACADEMIC SERVICE ( STUDENTS TABLE )
    */
+  console.log("🎓: Generating students...");
   const courseLookup = courses.reduce((acc, course) => {
     if (!acc[course.studentId]) {
       acc[course.studentId] = [];
@@ -116,12 +131,13 @@ const mapperFunction = (data, fs) => {
     return acc;
   }, {});
 
+  const studentsFoundMoreThan2Courses = [];
   const students = removedItemName.reduce((result, item) => {
     if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
       const foundCourses = courseLookup[item.userId?.S] || [];
 
       if (foundCourses.length > 1)
-        console.log("Found user with more than 1 course", foundCourses);
+        studentsFoundMoreThan2Courses.push(foundCourses);
 
       // Prepare reusable data
       const baseData = {
@@ -170,11 +186,21 @@ const mapperFunction = (data, fs) => {
     }
     return result;
   }, []);
+  console.log("🎓: Generating students finished...");
+  console.log(
+    "👤: Total numbers of students from users profile: ",
+    removedItemName.length
+  );
+  console.log("👪: Total numbers of students generated: ", students.length);
+  console.log(
+    "👥: Total numbers of students found studying multiple courses: ",
+    studentsFoundMoreThan2Courses.length
+  );
 
   /**
    *  ACADEMIC SERVICE ( STUDENT_GUARDIAN TABLE)
    */
-  console.log("generating student_guardian");
+  console.log("🫂: Generating student_guardians...");
   const student_guardian = removedItemName
     .map((item) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -190,13 +216,22 @@ const mapperFunction = (data, fs) => {
       return undefined;
     })
     .filter((item) => item !== undefined && item.guardianId);
+  console.log("🫂: Generating student_guardians finished...");
+  console.log(
+    "👤: Total numbers of students from users profile: ",
+    removedItemName.length
+  );
+  console.log(
+    "👪: Total students and guardian related found: ",
+    student_guardian.length
+  );
 
   /**
    *  LMS SERVICE ( USER TABLE )
    */
-  console.log("generating lms_users");
+  console.log("📕: Generating LMS's users...");
   let userNumberId = 32974;
-  
+
   const lms_users = removedItemName
     .map((item, index) => {
       if (!Object.prototype.hasOwnProperty.call(item, "schoolId")) {
@@ -247,11 +282,20 @@ const mapperFunction = (data, fs) => {
       return undefined;
     })
     .filter((item) => item !== undefined);
+    console.log("📕: Generating LMS's users finished...");
+    console.log(
+      "👤: Total numbers of students from users profile: ",
+      removedItemName.length
+    );
+    console.log(
+      "👪: Total users found: ",
+      student_guardian.length
+    );
 
   /**
    *  ACADEMIC SERVICE ( SUBJECT TABLE )
    */
-  console.log("generating subjects");
+  console.log("📕: Generating subjects for academic...");
   const subjects = _courses.map((item, index) => {
     return {
       tableName: "subject",
@@ -265,20 +309,21 @@ const mapperFunction = (data, fs) => {
       lmsCourseId: item.lmsCourseId,
     };
   });
+  console.log("📕: Generating subjects for academic finished...");
+  console.log("Total subjects count: ", subjects.length)
 
   /**
    *  LMS SERVICE ( LMS_COURSES_USERS TABLE )
    */
-  console.log("generating lms_courses_users");
+  console.log("📕: Generating and mapping users to courses for LMS...");
   const userNumberIdMap = new Map(
     lms_users.map((user) => [user.userId, user.userNumberId])
   );
+  // console.log("New set of userNumberIdMap", userNumberIdMap)
 
   const courseMap = new Map(
     courses.map((course) => [course.studentId, course.lmsCourseId])
   );
-
-  console.log("generating lms_courses_users");
 
   const lms_course_users = removedItemName
     .reduce((result, item) => {
@@ -319,6 +364,8 @@ const mapperFunction = (data, fs) => {
       return result;
     }, [])
     .filter((item) => item.courseId);
+    console.log("📕: Generating and mapping users to courses for LMS finished...");
+    console.log("Successfully mapped: ", lms_course_users.length, "To course.")
 
   // student_guardian
   fs.writeFileSync(
