@@ -15,3 +15,5 @@ generated_sql/*
 !generated_sql/note.txt
 
 venv
+
+node_modules

@@ -1,23 +1,42 @@
-export const dobHandlder = (item) => {
-  let response = null;
-  try {
-    if (item) {
-      if (item.hasOwnProperty("date_of_birth")) {
-        response = item?.date_of_birth?.S;
-      } else if (item.hasOwnProperty("dob")) {
-        response = item?.dob?.S;
-      }
-    } else {
-      response = false;
-    }
+import moment from "moment";
 
-    if (response == "Invalid date") {
-      response = "";
-    }
-    return response;
+export const variousDateHandler = (date) => {
+  return moment(date).format("YYYY-MM-DD");
+};
+
+export const dobHandlder = (item) => {
+  if (!item) return false;
+
+  try {
+    const dateOfBirth = item.date_of_birth?.S || item.dob?.S;
+    let response = dateOfBirth ? variousDateHandler(dateOfBirth) : null;
+    return response === "Invalid date" ? "" : response;
   } catch (error) {
     console.log("DOB HANDLER ERROR", error);
   }
+};
+
+export const fullNameHandler = (item) => {
+  if (!item) return "N/A";
+  const sentence = item;
+  const firstSpaceIndex = sentence.indexOf(" ");
+
+  // Get the part up to and including the first space
+  const firstValue =
+    firstSpaceIndex !== -1
+      ? sentence.substring(0, firstSpaceIndex + 1)
+      : sentence;
+
+  // Get the rest of the sentence after the first space, or "employer" if there's no space
+  const restOfSentence =
+    firstSpaceIndex !== -1
+      ? sentence.substring(firstSpaceIndex + 1)
+      : "employer";
+
+  return {
+    firstName: firstValue,
+    lastName: restOfSentence,
+  };
 };
 
 export const startDateHandler = (item) => {
@@ -52,4 +71,17 @@ export const isUUID = (value) => {
   const isUUID = uuidPattern.test(value);
   if (isUUID) return value;
   return "b740450d-a05d-4e1d-a235-1d507702f30d";
+};
+
+export const updateUserByName = (usersArray, name, newDetails) => {
+  const index = usersArray.findIndex((user) => user.name === name);
+
+  // Check if the user was found
+  if (index !== -1) {
+    // Update the user's details with newDetails
+    usersArray[index] = { ...usersArray[index], ...newDetails };
+    return true; // Return true to indicate success
+  }
+
+  return false; // Return false if the user was not found
 };
