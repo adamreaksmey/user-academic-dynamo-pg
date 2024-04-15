@@ -23,7 +23,7 @@ const insert_data = (data) => {
       let value = item[column];
       if (typeof value === "string") {
         return `'${value.replace(/'/g, "''")}'`; // Properly escape single quotes in strings
-      } else if (value === null || value === undefined || value === "") {
+      } else if (value === null || value === undefined || value === "" || value === 'NULL') {
         return "NULL"; // Explicitly handle null, undefined, and empty string values
       } else {
         return `'${JSON.stringify(value)}'`; // Convert other data types to JSON string and quote
