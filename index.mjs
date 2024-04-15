@@ -10,13 +10,22 @@ import {
 } from "./functions/sqlGenerator.mjs";
 import { reWriter } from "./functions/re-writer.mjs";
 import formatDynamoDBJson from "./functions/dynamo-formatter.mjs";
+import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const main = async (__filename, __dirname) => {
   // DynamoDB content transformer
-  formatDynamoDBJson("./sources/data.json", "./sources/data.json", fs);
+  // formatDynamoDBJson("./sources/data.json", "./sources/data.json", fs);
+
+  const sqlFilePath = "./generated_sql/academic-service/testing-backup-test.sql";
+  const sqlFileContent = fs.readFileSync(sqlFilePath, { encoding: "utf8" });
+
+  // console.log(sqlFileContent)
+  const jsonContent = await sqlToObjects(sqlFileContent);
+  return console.log(jsonContent);
+  // Getting file contents
 
   console.log("-- importing file data --");
   const data = fs.readFileSync(join(__dirname, "./sources/data.json"), "utf8");
@@ -46,123 +55,6 @@ const main = async (__filename, __dirname) => {
   const qResponse = insert_data(allData.default);
   const outputPath = "./generated_sql/academic-service/guardians.sql";
   sqlFileOutPutGenerator(qResponse, __dirname, fs, path, join, outputPath);
-
-  console.log("\x1b[36m%s\x1b[0m", "--- GUARDIANS HAVE BEEN GENERATED ---");
-
-  /**
-   * Students ( mapped )
-   */
-  modulePath = join(__dirname, "./logs/academic/students.mjs");
-  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
-  const allData_students = await import(uniqueUrl);
-
-  const qResponse_students = insert_data(allData_students.default);
-  const outputPath_students = "./generated_sql/academic-service/students.sql";
-  sqlFileOutPutGenerator(
-    qResponse_students,
-    __dirname,
-    fs,
-    path,
-    join,
-    outputPath_students
-  );
-
-  console.log("\x1b[36m%s\x1b[0m", "--- STUDENTS HAVE BEEN GENERATED ---");
-
-  /**
-   * Guard Students junction table ( mapped )
-   */
-  modulePath = join(__dirname, "./logs/academic/guardian_student.mjs");
-  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
-  const allData_students_guardian = await import(uniqueUrl);
-
-  const qResponse_students_guardian = insert_data(
-    allData_students_guardian.default
-  );
-  const outputPath_students_guardian =
-    "./generated_sql/academic-service/guardian_student.sql";
-  sqlFileOutPutGenerator(
-    qResponse_students_guardian,
-    __dirname,
-    fs,
-    path,
-    join,
-    outputPath_students_guardian
-  );
-
-  console.log(
-    "\x1b[33m%s\x1b[0m",
-    "--- Guardian Students junction HAVE BEEN GENERATED ---"
-  );
-
-  /**
-   * LMS USERS
-   */
-  modulePath = join(__dirname, "./logs/lms/users.mjs");
-  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
-  const allData_lms_users = await import(uniqueUrl);
-
-  const qResponse_lms_users = insert_data(allData_lms_users.default);
-  const outputPath_lms_users = "./generated_sql/lms-service/users.sql";
-  sqlFileOutPutGenerator(
-    qResponse_lms_users,
-    __dirname,
-    fs,
-    path,
-    join,
-    outputPath_lms_users
-  );
-
-  console.log(
-    "\x1b[33m%s\x1b[0m",
-    "--- LMS users junction HAVE BEEN GENERATED ---"
-  );
-
-  /**
-   *  ACADEMIC SUBJECTS
-   */
-  modulePath = join(__dirname, "./logs/academic/subjects.mjs");
-  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
-  const allData_subjects = await import(uniqueUrl);
-
-  const qResponse_subjects = insert_data(allData_subjects.default);
-  const outputPath_subjects = "./generated_sql/academic-service/subjects.sql";
-  sqlFileOutPutGenerator(
-    qResponse_subjects,
-    __dirname,
-    fs,
-    path,
-    join,
-    outputPath_subjects
-  );
-
-  console.log("\x1b[33m%s\x1b[0m", "--- Subjects HAVE BEEN GENERATED ---");
-
-  /**
-   *  LMS COURSE USER JUNCTION TABLE
-   */
-  modulePath = join(__dirname, "./logs/lms/lms_course_users.mjs");
-  uniqueUrl = pathToFileURL(modulePath).toString() + "?v=" + Date.now();
-  const allData_course_user = await import(uniqueUrl);
-
-  const qResponse_course_user = insert_data(allData_course_user.default);
-  const outputPath_course_user =
-    "./generated_sql/lms-service/lms_course_users.sql";
-  sqlFileOutPutGenerator(
-    qResponse_course_user,
-    __dirname,
-    fs,
-    path,
-    join,
-    outputPath_course_user
-  );
-
-  console.log(
-    "\x1b[33m%s\x1b[0m",
-    "--- LMS USERS COURSES HAVE BEEN GENERATED ---"
-  );
-
-  console.log("SQL file generated successfully.");
 };
 
 main(__filename, __dirname).catch(console.error);
