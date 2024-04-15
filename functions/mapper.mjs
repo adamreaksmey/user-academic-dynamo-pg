@@ -83,6 +83,7 @@ const mapperFunction = (data, fs) => {
     removedItemName.length
   );
   console.log("👪: Total numbers of guardians found: ", guardians.length);
+  console.log("-------------------------------------------------------------------------------------")
 
   /**
    *  LMS SERVICE ( COURSES TABLE )
@@ -117,7 +118,8 @@ const mapperFunction = (data, fs) => {
     "👤: Total numbers of students from users profile: ",
     removedItemName.length
   );
-  console.log("👪: Total numbers of courses found: ", courses.length);
+  console.log("👪: Total numbers of courses found ( not filtering out duplication ): ", courses.length);
+  console.log("-------------------------------------------------------------------------------------")
 
   /**
    *  ACADEMIC SERVICE ( STUDENTS TABLE )
@@ -196,6 +198,7 @@ const mapperFunction = (data, fs) => {
     "👥: Total numbers of students found studying multiple courses: ",
     studentsFoundMoreThan2Courses.length
   );
+  console.log("-------------------------------------------------------------------------------------")
 
   /**
    *  ACADEMIC SERVICE ( STUDENT_GUARDIAN TABLE)
@@ -225,6 +228,7 @@ const mapperFunction = (data, fs) => {
     "👪: Total students and guardian related found: ",
     student_guardian.length
   );
+  console.log("-------------------------------------------------------------------------------------")
 
   /**
    *  LMS SERVICE ( USER TABLE )
@@ -289,8 +293,9 @@ const mapperFunction = (data, fs) => {
     );
     console.log(
       "👪: Total users found: ",
-      student_guardian.length
+      lms_users.length
     );
+    console.log("-------------------------------------------------------------------------------------")
 
   /**
    *  ACADEMIC SERVICE ( SUBJECT TABLE )
@@ -311,6 +316,7 @@ const mapperFunction = (data, fs) => {
   });
   console.log("📕: Generating subjects for academic finished...");
   console.log("Total subjects count: ", subjects.length)
+  console.log("-------------------------------------------------------------------------------------")
 
   /**
    *  LMS SERVICE ( LMS_COURSES_USERS TABLE )
@@ -366,6 +372,7 @@ const mapperFunction = (data, fs) => {
     .filter((item) => item.courseId);
     console.log("📕: Generating and mapping users to courses for LMS finished...");
     console.log("Successfully mapped: ", lms_course_users.length, "To course.")
+    console.log("-------------------------------------------------------------------------------------")
 
   // student_guardian
   fs.writeFileSync(
