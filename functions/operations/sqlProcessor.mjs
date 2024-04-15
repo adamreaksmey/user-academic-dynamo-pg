@@ -15,11 +15,11 @@ export const processSqlBackup = async (tableName, filePath) => {
     replaceNullWithEmptyString(data)
   );
 
-
   if (tableName == "student") {
     formattedContent = objectsContent.map((data) => {
       return {
         tableName,
+        schoolId: ibfProdSchoolId,
         studentId: randomUUID(),
         idCard: data?.idCard || "",
         firstName: data?.firstName || "",
@@ -36,9 +36,12 @@ export const processSqlBackup = async (tableName, filePath) => {
         },
         uniqueKey: data?.idCard,
         campusId: ibfCampusId,
-        
+        groupStructureId: data.userNumberId,
+        structureRecordId: null,
       };
     });
+  } else {
+    formattedContent = objectsContent;
   }
 
   return formattedContent;

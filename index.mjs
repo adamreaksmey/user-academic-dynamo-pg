@@ -28,6 +28,21 @@ const main = async (__filename, __dirname) => {
   let LMS_USERS = [];
   let LMS_COURSES_USERS = [];
 
+  /**
+   *  Export lms_courses_users
+   */
+  LMS_COURSES_USERS = await processSqlBackup(
+    "lms_courses_users",
+    "./generated_sql/lms-service/backup/lms_courses_users_backup.sql"
+  );
+  fs.writeFileSync(
+    join(__dirname, "./logs/backup/courses_users.mjs"),
+    `export default ${JSON.stringify(LMS_COURSES_USERS)}`
+  );
+
+  /**
+   *  Export users to students
+   */
   LMS_USERS = await processSqlBackup(
     "student",
     "./generated_sql/lms-service/backup/lms_user_backup.sql"
