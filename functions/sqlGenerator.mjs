@@ -9,8 +9,8 @@ const tableConfig = {
   },
   lms_courses_users: {
     updateColumns: ["courseId"],
-    idColumn: "userNumberId"
-  }
+    idColumn: "userNumberId",
+  },
 };
 
 const insert_data = (data) => {
@@ -23,24 +23,42 @@ const insert_data = (data) => {
       let value = item[column];
       if (typeof value === "string") {
         return `'${value.replace(/'/g, "''")}'`; // Properly escape single quotes in strings
-      } else if (value === null || value === undefined || value === "" || value === 'NULL') {
+      } else if (
+        value === null ||
+        value === undefined ||
+        value === "" ||
+        value === "NULL"
+      ) {
         return "NULL"; // Explicitly handle null, undefined, and empty string values
       } else {
         return `'${JSON.stringify(value)}'`; // Convert other data types to JSON string and quote
       }
     });
 
+    const idCard = (() => {
+      return Object.prototype.hasOwnProperty.call(item, "idCard")
+        ? item.idCard
+        : null;
+    })();
+    // console.log(idCard)
+
     if (
       tableConfig[item.tableName] &&
       columns.includes(tableConfig[item.tableName].idColumn)
     ) {
       const config = tableConfig[item.tableName];
-      let updateColumns = config.updateColumns.filter(col => columns.includes(col));
-      
-      let updateSet = updateColumns.map(col => {
-        let valueIndex = columns.indexOf(col);
-        return `"${col}" = ${values[valueIndex] === "''" ? "NULL" : values[valueIndex]}`;
-      }).join(", ");
+      let updateColumns = config.updateColumns.filter((col) =>
+        columns.includes(col)
+      );
+
+      let updateSet = updateColumns
+        .map((col) => {
+          let valueIndex = columns.indexOf(col);
+          return `"${col}" = ${
+            values[valueIndex] === "''" ? "NULL" : values[valueIndex]
+          }`;
+        })
+        .join(", ");
 
       // If no update columns are present, set the first configurable column to NULL
       if (!updateSet && config.updateColumns.length) {
@@ -55,12 +73,18 @@ const insert_data = (data) => {
         queries.push(`DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM public.user WHERE "userNumberId" = ${idValue}) THEN
-    IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${config.idColumn}" = ${idValue}) THEN
-      UPDATE public.${item.tableName} SET ${updateSet} WHERE "${config.idColumn}" = ${idValue};
+    IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+      UPDATE public.${item.tableName} SET ${updateSet} WHERE "${
+          config.idColumn
+        }" = ${idValue};
     ELSE
-      INSERT INTO public.${item.tableName} (${columns.map(col => `"${col}"`).join(", ")}) VALUES (${values
-        .map(value => (value === "''" ? "NULL" : value))
-        .join(", ")});
+      INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
     END IF;
   END IF;
 END $$;`);
@@ -68,12 +92,18 @@ END $$;`);
         // Regular logic for other tables
         queries.push(`DO $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${config.idColumn}" = ${idValue}) THEN
-    UPDATE public.${item.tableName} SET ${updateSet} WHERE "${config.idColumn}" = ${idValue};
+  IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+    UPDATE public.${item.tableName} SET ${updateSet} WHERE "${
+          config.idColumn
+        }" = ${idValue};
   ELSE
-    INSERT INTO public.${item.tableName} (${columns.map(col => `"${col}"`).join(", ")}) VALUES (${values
-      .map(value => (value === "''" ? "NULL" : value))
-      .join(", ")});
+    INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
   END IF;
 END $$;`);
       }
@@ -81,9 +111,9 @@ END $$;`);
       // Build the standard insert query for other cases
       queries.push(
         `INSERT INTO public.${item.tableName} (${columns
-          .map(column => `"${column}"`)
+          .map((column) => `"${column}"`)
           .join(", ")}) VALUES (${values
-          .map(value => (value === "''" ? "NULL" : value))
+          .map((value) => (value === "''" ? "NULL" : value))
           .join(", ")});`
       );
     }

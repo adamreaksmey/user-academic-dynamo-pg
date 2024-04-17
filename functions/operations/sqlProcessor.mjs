@@ -17,41 +17,67 @@ export const processSqlBackup = async (tableName, filePath) => {
   );
 
   let formattedContent = [];
+  let totalNumberOfUserFound = [];
+  let usersNotFound = [];
+  let usersWithoutIdCard = [];
+
   if (tableName === "student") {
     const COURSES_USERS = await FETCHED_COURSES_USERS();
     for (const data of objectsContent) {
       const userFound = COURSES_USERS.find(
         (user) => user.userNumberId === data.userNumberId
       );
-      const courseInfo = COURSE_INFORMATION(userFound.courseId);
-      console.log("COURSE INFO =>", courseInfo);
 
-      formattedContent.push({
-        tableName,
-        schoolId: ibfProdSchoolId,
-        studentId: randomUUID(),
-        idCard: data?.idCard || "",
-        firstName: data?.firstName || "",
-        lastName: data?.lastName || "",
-        firstNameNative: data?.firstName || "",
-        lastNameNative: data?.lastName || "",
-        gender: data?.gender.toLowerCase() || "",
-        dob: dobHandlder(data.dob),
-        remark: [data.remark?.replaceAll("'", "`") ?? ""],
-        status: "start",
-        profile: {
-          position: data?.position?.replaceAll("'", "`") || "",
-          phone: data.phone,
-        },
-        uniqueKey: data?.idCard,
-        campusId: ibfCampusId,
-        groupStructureId: courseInfo.groupStructureId,
-        structureRecordId: courseInfo.structureRecordId,
-      });
+      if (!userFound) {
+        usersNotFound.push(data);
+      }
+
+      if (
+        !Object.prototype.hasOwnProperty.call(data, "idCard") &&
+        !data.idCard
+      ) {
+        usersWithoutIdCard.push(data);
+      }
+
+      const courseInfo = COURSE_INFORMATION(userFound?.courseId);
+
+      if (userFound) {
+        totalNumberOfUserFound.push(userFound);
+        formattedContent.push({
+          tableName,
+          schoolId: ibfProdSchoolId,
+          studentId: randomUUID(),
+          idCard: data?.idCard || "",
+          firstName: data?.firstName || "",
+          lastName: data?.lastName || "",
+          firstNameNative: data?.firstName || "",
+          lastNameNative: data?.lastName || "",
+          gender: data?.gender.toLowerCase() || "",
+          dob: dobHandlder(data.dob),
+          remark: [data.remark?.replaceAll("'", "`") ?? ""],
+          status: "start",
+          profile: {
+            position: data?.position?.replaceAll("'", "`") || "",
+            phone: data.phone,
+          },
+          uniqueKey: data?.idCard,
+          campusId: ibfCampusId,
+          groupStructureId: courseInfo.groupStructureId,
+          structureRecordId: courseInfo.structureRecordId,
+        });
+      }
     }
   } else {
     formattedContent = objectsContent;
   }
+
+  console.log("Total numbers of users from lms", formattedContent.length);
+  console.log(
+    "Total numbers of users found in lms_courses",
+    totalNumberOfUserFound.length
+  );
+  console.log("Users not found in course", usersNotFound);
+  console.log("Users without idCard", usersWithoutIdCard);
 
   return formattedContent;
 };
@@ -76,16 +102,13 @@ const FETCHED_COURSES_USERS = async () => {
 };
 
 const COURSE_INFORMATION = (courseId) => {
-  if (!courseId) return "";
-  const courseInfo = courses.find((data) => data.lmsCourseId == courseId);
-  if (courseInfo) {
-    return {
-      structureRecordId: courseInfo.structureRecordId,
-      groupStructureId: courseInfo.groupStructureId,
-    };
-  }
+  const courseInfo = courseId
+    ? courses.find((data) => data.lmsCourseId == courseId)
+    : null;
+
   return {
-    structureRecordId: null,
-    groupStructureId: null,
+    title: courseInfo ? courseInfo.title : null,
+    structureRecordId: courseInfo ? courseInfo.structureRecordId : null,
+    groupStructureId: courseInfo ? courseInfo.groupStructureId : null,
   };
 };
