@@ -53,7 +53,7 @@ export const processSqlBackup = async (tableName, filePath) => {
           firstNameNative: data?.firstName || "",
           lastNameNative: data?.lastName || "",
           gender: data?.gender.toLowerCase() || "",
-          dob: dobHandlder(data.dob),
+          dob: dobHandlder(data.dob) || "",
           remark: [data.remark?.replaceAll("'", "`") ?? ""],
           status: "start",
           profile: {
@@ -64,6 +64,9 @@ export const processSqlBackup = async (tableName, filePath) => {
           campusId: ibfCampusId,
           groupStructureId: courseInfo.groupStructureId,
           structureRecordId: courseInfo.structureRecordId,
+          _employer:
+            data?.employer == "" || !data?.employer ? null : data?.employer,
+          userNumberId: data?.userNumberId,
         });
       }
     }

@@ -1,7 +1,7 @@
 const tableConfig = {
   user: {
     updateColumns: ["dob", "guardianId", "guardianName"],
-    idColumn: "userId",
+    idColumn: "userNumberId",
   },
   student: {
     updateColumns: ["groupStructureId", "structureRecordId"],
@@ -10,6 +10,10 @@ const tableConfig = {
   lms_courses_users: {
     updateColumns: ["courseId"],
     idColumn: "userNumberId",
+  },
+  guardian_student: {
+    updateColumns: ["guardianId"],
+    idColumn: "studentId",
   },
 };
 
@@ -40,7 +44,6 @@ const insert_data = (data) => {
         ? item.idCard
         : null;
     })();
-    // console.log(idCard)
 
     if (
       tableConfig[item.tableName] &&
@@ -88,7 +91,20 @@ BEGIN
     END IF;
   END IF;
 END $$;`);
-      } else {
+      } else if (item.tableName == "student") {
+        queries.push(`DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+  INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
+  END IF;
+END $$;`);
+      } else if (item.tableName === "guardian_student") {
         // Regular logic for other tables
         queries.push(`DO $$
 BEGIN
@@ -106,6 +122,18 @@ BEGIN
           .join(", ")});
   END IF;
 END $$;`);
+      } else if (item.tableName == "user") {
+        queries.push(`DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+              config.idColumn
+            }" = ${idValue}) THEN
+        UPDATE public.${item.tableName} SET ${updateSet} WHERE "${
+              config.idColumn
+            }" = ${idValue};
+      END IF;
+    END $$;
+        `)
       }
     } else {
       // Build the standard insert query for other cases
