@@ -6,7 +6,7 @@ export const sqlToObjects = (sql) => {
     .filter((s) => s.length > 0);
 
   // Function to parse a single INSERT statement into an object
-  function parseInsertStatement(statement) {
+  const parseInsertStatement = (statement) => {
     // Extract column names
     // console.log("statement", statement)
     const columnPart = statement.match(/\(([^)]+)\)/)[1];
@@ -62,7 +62,7 @@ export const sqlToObjects = (sql) => {
     });
 
     return rowObject;
-  }
+  };
 
   return statements.map(parseInsertStatement);
 };
