@@ -10,6 +10,9 @@ import {
 import { processSqlBackup } from "./functions/operations/sqlProcessor.mjs";
 import guardians from "./logs/academic/guardians.mjs";
 
+import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
+import { promises as pfs } from "fs";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -28,6 +31,139 @@ const main = async (__filename, __dirname) => {
   let LMS_COURSES_USERS = [];
   let GUARDIANS_STUDENTS = [];
 
+  let USERS_PRODUCTION = [];
+  let STUDENTS_PRODUCTION = [];
+
+  /**
+   *  Mapping the remaining 1401 students in academic to lms users
+   *
+   */
+  const usersPath = "./generated_sql/production/lms-prod-user.sql";
+  USERS_PRODUCTION = await processSqlBackup("user", usersPath);
+
+  const studentsPath = "./generated_sql/production/academic-prod-student.sql";
+  STUDENTS_PRODUCTION = await processSqlBackup(
+    "student_UPDATEONLY",
+    studentsPath
+  );
+
+  const filteringStudentsContents = STUDENTS_PRODUCTION.filter(
+    (data) => data.structureRecordId == "edfead77-9c32-4709-b868-4648d3fa4cce"
+  );
+
+  const filteringUsersContents = USERS_PRODUCTION.filter(
+    (data) => data.email == "___"
+  ).filter((item) => item.employer && item.idCard);
+
+  console.log(
+    "TOTAL USERS FOUND WITH EMPLOYERS",
+    filteringUsersContents.length
+  );
+
+  // Pre-compute and store normalized employer names and IDs for quick lookup
+  const guardianIdByNormalizedEmployerName = new Map();
+  guardians.forEach((data) => {
+    const normalizedEmployerName = (data.firstName + data.lastName)
+      .replace(/\s+/g, "")
+      .toLowerCase();
+    guardianIdByNormalizedEmployerName.set(
+      normalizedEmployerName,
+      data.guardianId
+    );
+  });
+
+  // Active People's Plc. is a special case and can be handled outside the loop
+  const activePeoplesPlcId =
+    guardianIdByNormalizedEmployerName.get("activepeople'splc.");
+
+  // Map student IDs by idCard for quick lookup
+  const studentIdByIdCard = new Map();
+  STUDENTS_PRODUCTION.forEach((data) => {
+    studentIdByIdCard.set(data.idCard, data.studentId);
+  });
+
+  const MAP_STUDENT_TO_GUARDIAN_ACADEMIC = filteringUsersContents
+    .map((item) => {
+      let guardianId = null;
+      if (item.employer === "Active People''s Plc.") {
+        guardianId = activePeoplesPlcId;
+      } else {
+        const normalizedEmployerName = item.employer
+          .replace(/\s+/g, "")
+          .toLowerCase();
+        guardianId = guardianIdByNormalizedEmployerName.get(
+          normalizedEmployerName
+        );
+      }
+
+      return {
+        tableName: "student_UPDATEONLY",
+        guardianId: guardianId,
+        idCard: item.idCard,
+        studentId: studentIdByIdCard.get(item.idCard),
+      };
+    })
+    .filter((d) => d.guardianId)
+    .map((i) => {
+      delete i.idCard;
+      return {
+        ...i,
+      };
+    });
+
+  const ASSIGN_STUDENT_TO_GUARDIAN = filteringUsersContents.map((item) => {
+    let guardianId = null;
+    if (item.employer === "Active People''s Plc.") {
+      guardianId = activePeoplesPlcId;
+    } else {
+      const normalizedEmployerName = item.employer
+        .replace(/\s+/g, "")
+        .toLowerCase();
+      guardianId = guardianIdByNormalizedEmployerName.get(
+        normalizedEmployerName
+      );
+    }
+    return {
+      tableName: "user",
+      guardianId: guardianId,
+      guardianName: item.employer,
+      userNumberId: item.userNumberId,
+    };
+  });
+
+  return;
+  console.log(ASSIGN_STUDENT_TO_GUARDIAN);
+
+  const qResponse_finalStudentUPDATE = insert_data(ASSIGN_STUDENT_TO_GUARDIAN);
+
+  const outputPath_finalSTUDENT =
+    "./generated_sql/production/generated/student-guardian-update.sql";
+  sqlFileOutPutGenerator(
+    qResponse_finalStudentUPDATE,
+    __dirname,
+    fs,
+    path,
+    join,
+    outputPath_finalSTUDENT
+  );
+
+  console.log("AFTER MAPPED");
+  // console.log(MAP_STUDENT_TO_GUARDIAN_ACADEMIC);
+
+  // const qResponse_finalStudentUPDATE = insert_data(FINAL_STUDENTS_UPDATE);
+
+  // const outputPath_finalSTUDENT =
+  //   "./generated_sql/production/generated/students_update.sql";
+  // sqlFileOutPutGenerator(
+  //   qResponse_finalStudentUPDATE,
+  //   __dirname,
+  //   fs,
+  //   path,
+  //   join,
+  //   outputPath_finalSTUDENT
+  // );
+
+  return;
   /**
    *  Export lms_courses_users
    */

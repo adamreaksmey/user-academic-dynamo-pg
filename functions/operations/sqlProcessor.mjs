@@ -58,7 +58,7 @@ export const processSqlBackup = async (tableName, filePath) => {
           status: "start",
           profile: {
             position: data?.position?.replaceAll("'", "`") || "",
-            phone: data.phone,
+            phone: data.phone
           },
           uniqueKey: data?.idCard,
           campusId: ibfCampusId,
@@ -74,13 +74,13 @@ export const processSqlBackup = async (tableName, filePath) => {
     formattedContent = objectsContent;
   }
 
-  console.log("Total numbers of users from lms", formattedContent.length);
-  console.log(
-    "Total numbers of users found in lms_courses",
-    totalNumberOfUserFound.length
-  );
-  console.log("Users not found in course", usersNotFound);
-  console.log("Users without idCard", usersWithoutIdCard);
+  // console.log("Total numbers of users from lms", formattedContent.length);
+  // console.log(
+  //   "Total numbers of users found in lms_courses",
+  //   totalNumberOfUserFound.length
+  // );
+  // console.log("Users not found in course", usersNotFound);
+  // console.log("Users without idCard", usersWithoutIdCard);
 
   return formattedContent;
 };

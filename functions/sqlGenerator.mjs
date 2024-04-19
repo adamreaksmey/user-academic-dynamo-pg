@@ -1,6 +1,6 @@
 const tableConfig = {
   user: {
-    updateColumns: ["dob", "guardianId", "guardianName"],
+    updateColumns: ["guardianId", "guardianName"],
     idColumn: "userNumberId",
   },
   student: {
@@ -13,6 +13,10 @@ const tableConfig = {
   },
   guardian_student: {
     updateColumns: ["guardianId"],
+    idColumn: "studentId",
+  },
+  student_UPDATEONLY: {
+    updateColumns: ["guardianId", "studentId"],
     idColumn: "studentId",
   },
 };
@@ -125,15 +129,24 @@ END $$;`);
       } else if (item.tableName == "user") {
         queries.push(`DO $$
     BEGIN
-      IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
-              config.idColumn
-            }" = ${idValue}) THEN
-        UPDATE public.${item.tableName} SET ${updateSet} WHERE "${
-              config.idColumn
-            }" = ${idValue};
+      IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${config.idColumn}" = ${idValue}) THEN
+        UPDATE public.${item.tableName} SET ${updateSet} WHERE "${config.idColumn}" = ${idValue};
       END IF;
     END $$;
-        `)
+        `);
+      } else if (item.tableName == "student_UPDATEONLY" && idValue !== "NULL") {
+        queries.push(`DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+          INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
+          END IF;
+        END $$;`);
       }
     } else {
       // Build the standard insert query for other cases
