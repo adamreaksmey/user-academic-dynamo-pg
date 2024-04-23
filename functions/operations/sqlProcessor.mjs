@@ -9,6 +9,8 @@ const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
 const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
 const incrementor = 0;
 import { dobHandlder } from "./data.mjs";
+import guardians from "../../logs/academic/guardians.mjs";
+import guardiansToBeReplaced from "../../map/guardians.mjs";
 
 export const processSqlBackup = async (tableName = null, filePath) => {
   const sqlFileContent = await fs.readFile(filePath, { encoding: "utf8" });
@@ -70,19 +72,119 @@ export const processSqlBackup = async (tableName = null, filePath) => {
         });
       }
     }
+  } else if (tableName == "user") {
+    // Preprocess guardiansToBeReplaced to a Map for quick access
+    const guardianReplaceMap = new Map(
+      guardiansToBeReplaced.flatMap((guardian) => {
+        const objKeyExists = objHasKey(guardian, "oldGuardianId");
+        return objKeyExists
+          ? [[guardian.oldGuardianId, guardian.toBeUpdatedId]]
+          : [];
+      })
+    );
+
+    // Preprocess guardians to a Map for quick access
+    const guardianMap = new Map(
+      guardians.map((guardian) => [guardian.guardianId, guardian])
+    );
+
+    const mappedUSERS_PRODUCTION = objectsContent
+      .map((data) => {
+        // Get the guardianId to replace
+        const defaultGuardianId = guardianReplaceMap.get(data.guardianId);
+
+        // Get the guardian object directly using the preprocessed map
+        const defaultGuardian = defaultGuardianId
+          ? guardianMap.get(defaultGuardianId)
+          : null;
+
+        // Define guardianName using the found guardian object
+        const guardianNameHandler = () => {
+          if (defaultGuardian)
+            return defaultGuardian.firstName + defaultGuardian.lastName;
+          return null;
+        };
+
+        return {
+          tableName: "user",
+          guardianId: defaultGuardianId,
+          guardianName: guardianNameHandler(),
+          userNumberId: data.userNumberId,
+        };
+      })
+      .filter((student) => student.guardianName && student.guardianId);
+
+    console.log(
+      "User in lms found being assigned to duplicated guardians: ",
+      mappedUSERS_PRODUCTION.length
+    );
+    return mappedUSERS_PRODUCTION;
+  } else if (tableName == "guardian_student") {
+    // mapping guardian key access
+    const guardianReplaceMap = new Map(
+      guardiansToBeReplaced.flatMap((guardian) => {
+        const objKeyExists = objHasKey(guardian, "oldGuardianId");
+        return objKeyExists
+          ? [[guardian.oldGuardianId, guardian.toBeUpdatedId]]
+          : [];
+      })
+    );
+
+    const mapped_GUARDIAN_STUDENT = objectsContent
+      .map((data) => {
+        // Get the guardianId to replace
+        const defaultGuardianId = guardianReplaceMap.get(data.guardianId);
+
+        return {
+          tableName: "guardian_student",
+          guardianId: defaultGuardianId,
+          studentId: data.studentId,
+        };
+      })
+      .filter((student) => student.studentId && student.guardianId);
+
+    console.log(
+      "Students in academic found being assigned to duplicated guardians: ",
+      mapped_GUARDIAN_STUDENT.length
+    );
+    return mapped_GUARDIAN_STUDENT;
+  } else if (tableName == "guardian") {
+    // preparing to be deleted
+    const guardianReplaceMap = new Map(
+      guardiansToBeReplaced.flatMap((guardian) => {
+        const objKeyExists = objHasKey(guardian, "oldGuardianId");
+        return objKeyExists
+          ? [[guardian.oldGuardianId, guardian.oldGuardianId]]
+          : [];
+      })
+    );
+
+    // mapping deletion
+    const mapped_DELETION = objectsContent
+      .map((data) => {
+        // Get the guardianId to replace
+        const defaultGuardianId = guardianReplaceMap.get(data.guardianId);
+
+        return {
+          tableName,
+          guardianId: defaultGuardianId,
+        };
+      })
+      .filter((guardian) => guardian.guardianId);
+    console.log(
+      "Numbers of duplicated guardians to be deleted: ",
+      mapped_DELETION.length
+    );
+    return mapped_DELETION;
   } else {
     formattedContent = objectsContent;
   }
 
-  // console.log("Total numbers of users from lms", formattedContent.length);
-  // console.log(
-  //   "Total numbers of users found in lms_courses",
-  //   totalNumberOfUserFound.length
-  // );
-  // console.log("Users not found in course", usersNotFound);
-  // console.log("Users without idCard", usersWithoutIdCard);
-
   return formattedContent;
+};
+
+const objHasKey = (obj, key) => {
+  return Object.prototype.hasOwnProperty.call(obj, key);
 };
 
 const replaceNullWithEmptyString = (data) => {

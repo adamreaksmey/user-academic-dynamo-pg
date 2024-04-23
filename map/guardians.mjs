@@ -84,30 +84,37 @@ const guardiansToBeReplaced = [
   {
     replacedName: "NongHyup  Finance",
     toBeUpdatedId: "d3b676e5-a091-4960-9340-712cdb7fdf9a",
+    oldGuardianId: "e909c5c3-49d0-46b2-9a14-4e8ab51d0bc2",
   },
   {
     replacedName: "PANDA  Commercial Bank Plc.",
     toBeUpdatedId: "76e12ba3-5ee0-4862-90ee-9d91b5ae0720",
+    oldGuardianId: "92f0e7a1-a15d-4bd5-8e04-42e0ca337141",
   },
   {
     replacedName: "Paragon  University",
     toBeUpdatedId: "b1f9fed0-bb5e-4612-9ad4-6a16d5fef6e6",
+    oldGuardianId: "a35f6481-799c-4b78-b5ff-4a199e88873d",
   },
   {
     replacedName: "PRINCE  BANK PLC.",
     toBeUpdatedId: "473edcc2-99f6-438a-be70-0f80b488caa2",
+    oldGuardianId: "c79d7122-376a-4d42-836b-989168167f64",
   },
   {
     replacedName: "Right  Smart Finance",
     toBeUpdatedId: "8dc5ff69-9999-4e6d-b5a4-d02aab87bf8b",
+    oldGuardianId: "2edb0357-a2e4-481b-9227-5bdcf4bcb8d8",
   },
   {
     replacedName: "Rolya  Plc.",
     toBeUpdatedId: "d4139fd7-989b-41ef-b457-88f420a3d0dd",
+    oldGuardianId: "1a14c97d-da56-4432-9143-7e8542286e1c",
   },
   {
     replacedName: "SaigonHanoi  Bank Cambodia Plc.",
     toBeUpdatedId: "b45a66a3-651d-48c3-afc3-e21605de4a1c",
+    oldGuardianId: "ee120657-13f0-4f4d-925e-d6b3cde83521",
   },
 ];
 

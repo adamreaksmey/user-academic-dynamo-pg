@@ -19,6 +19,10 @@ const tableConfig = {
     updateColumns: ["guardianId", "studentId"],
     idColumn: "studentId",
   },
+  guardian: {
+    updateColumns: ["guardianId"],
+    idColumn: "guardianId",
+  },
 };
 
 const insert_data = (data) => {
@@ -67,6 +71,8 @@ const insert_data = (data) => {
         })
         .join(", ");
 
+      // console.log(updateSet)
+
       // If no update columns are present, set the first configurable column to NULL
       if (!updateSet && config.updateColumns.length) {
         updateSet = `"${config.updateColumns[0]}" = NULL`;
@@ -110,29 +116,16 @@ BEGIN
 END $$;`);
       } else if (item.tableName === "guardian_student") {
         // Regular logic for other tables
-        queries.push(`DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
-          config.idColumn
-        }" = ${idValue}) THEN
-    UPDATE public.${item.tableName} SET ${updateSet} WHERE "${
-          config.idColumn
-        }" = ${idValue};
-  ELSE
-    INSERT INTO public.${item.tableName} (${columns
-          .map((col) => `"${col}"`)
-          .join(", ")}) VALUES (${values
-          .map((value) => (value === "''" ? "NULL" : value))
-          .join(", ")});
-  END IF;
-END $$;`);
+        queries.push(`
+UPDATE public.${item.tableName}
+SET ${updateSet}
+WHERE "${config.idColumn}" = ${idValue};
+        `);
       } else if (item.tableName == "user") {
-        queries.push(`DO $$
-    BEGIN
-      IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${config.idColumn}" = ${idValue}) THEN
-        UPDATE public.${item.tableName} SET ${updateSet} WHERE "${config.idColumn}" = ${idValue};
-      END IF;
-    END $$;
+        queries.push(`
+UPDATE public.${item.tableName}
+SET ${updateSet}
+WHERE "${config.idColumn}" = ${idValue};
         `);
       } else if (item.tableName == "student_UPDATEONLY" && idValue !== "NULL") {
         queries.push(`DO $$
@@ -147,6 +140,10 @@ END $$;`);
           .join(", ")});
           END IF;
         END $$;`);
+      } else if (item.tableName == "guardian") {
+        queries.push(
+          `DELETE FROM public.${item.tableName} WHERE ${updateSet};`
+        );
       }
     } else {
       // Build the standard insert query for other cases

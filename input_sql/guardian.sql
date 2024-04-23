@@ -1,25 +1,3 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 14.10
--- Dumped by pg_dump version 14.11 (Ubuntu 14.11-0ubuntu0.22.04.1)
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Data for Name: guardian; Type: TABLE DATA; Schema: public; Owner: -
---
-
 INSERT INTO public.guardian ("guardianId", "schoolId", "firstName", "lastName", "firstNameNative", "lastNameNative", gender, dob, phone, email, address, photo, "createdAt", "updatedAt", "archiveStatus", "userName") VALUES ('e161da01-13b2-454d-944d-b15a600a14bf', '61f17951-d509-4b60-967b-a84442f949b6', 'Hattha ', 'Bank Plc.', NULL, NULL, NULL, NULL, NULL, 'employer0@gmail.com', NULL, NULL, '2024-04-17 09:13:38.471851+00', '2024-04-17 09:13:38.471851+00', 0, 'employer0');
 INSERT INTO public.guardian ("guardianId", "schoolId", "firstName", "lastName", "firstNameNative", "lastNameNative", gender, dob, phone, email, address, photo, "createdAt", "updatedAt", "archiveStatus", "userName") VALUES ('baccc928-dc6e-4ea9-a806-e2731c6c0088', '61f17951-d509-4b60-967b-a84442f949b6', 'ACLEDA ', 'Bank Plc.', NULL, NULL, NULL, NULL, NULL, 'employer1@gmail.com', NULL, NULL, '2024-04-17 09:13:38.475364+00', '2024-04-17 09:13:38.475364+00', 0, 'employer1');
 INSERT INTO public.guardian ("guardianId", "schoolId", "firstName", "lastName", "firstNameNative", "lastNameNative", gender, dob, phone, email, address, photo, "createdAt", "updatedAt", "archiveStatus", "userName") VALUES ('434afc8a-80af-4083-bf6a-88cf9c8e40fb', '61f17951-d509-4b60-967b-a84442f949b6', 'Cambodia ', 'Post Bank Plc.', NULL, NULL, NULL, NULL, NULL, 'employer2@gmail.com', NULL, NULL, '2024-04-17 09:13:38.477115+00', '2024-04-17 09:13:38.477115+00', 0, 'employer2');
@@ -232,9 +210,3 @@ INSERT INTO public.guardian ("guardianId", "schoolId", "firstName", "lastName", 
 INSERT INTO public.guardian ("guardianId", "schoolId", "firstName", "lastName", "firstNameNative", "lastNameNative", gender, dob, phone, email, address, photo, "createdAt", "updatedAt", "archiveStatus", "userName") VALUES ('9640d997-7c37-4c6f-8160-8081d700ac18', '61f17951-d509-4b60-967b-a84442f949b6', 'CAMMA ', 'MICROFINANCE LIMITED', NULL, NULL, NULL, NULL, NULL, 'employer41439@gmail.com', NULL, NULL, '2024-04-17 09:13:38.809691+00', '2024-04-17 09:13:38.809691+00', 0, 'employer41439');
 INSERT INTO public.guardian ("guardianId", "schoolId", "firstName", "lastName", "firstNameNative", "lastNameNative", gender, dob, phone, email, address, photo, "createdAt", "updatedAt", "archiveStatus", "userName") VALUES ('eb28f8f8-8b12-4903-bea6-db6750581acf', '61f17951-d509-4b60-967b-a84442f949b6', 'Leng ', 'Navatra Capital Plc', NULL, NULL, NULL, NULL, NULL, 'employer41655@gmail.com', NULL, NULL, '2024-04-17 09:13:38.811072+00', '2024-04-17 09:13:38.811072+00', 0, 'employer41655');
 INSERT INTO public.guardian ("guardianId", "schoolId", "firstName", "lastName", "firstNameNative", "lastNameNative", gender, dob, phone, email, address, photo, "createdAt", "updatedAt", "archiveStatus", "userName") VALUES ('bbd4808e-b7ed-41a3-99aa-d4a26933bdbd', '61f17951-d509-4b60-967b-a84442f949b6', 'cnguy@paragoniu.edu.kh', 'employer', NULL, NULL, NULL, NULL, NULL, 'employer46079@gmail.com', NULL, NULL, '2024-04-17 09:13:38.81253+00', '2024-04-17 09:13:38.81253+00', 0, 'employer46079');
-
-
---
--- PostgreSQL database dump complete
---
-
