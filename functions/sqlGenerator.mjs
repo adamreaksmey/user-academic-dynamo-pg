@@ -1,7 +1,7 @@
 const tableConfig = {
   user: {
-    updateColumns: ["dob", "guardianId", "guardianName"],
-    idColumn: "userId",
+    updateColumns: ["guardianId", "guardianName"],
+    idColumn: "userNumberId",
   },
   student: {
     updateColumns: ["groupStructureId", "structureRecordId"],
@@ -9,8 +9,20 @@ const tableConfig = {
   },
   lms_courses_users: {
     updateColumns: ["courseId"],
-    idColumn: "userNumberId"
-  }
+    idColumn: "userNumberId",
+  },
+  guardian_student: {
+    updateColumns: ["guardianId"],
+    idColumn: "studentId",
+  },
+  student_UPDATEONLY: {
+    updateColumns: ["guardianId", "studentId"],
+    idColumn: "studentId",
+  },
+  guardian: {
+    updateColumns: ["guardianId"],
+    idColumn: "guardianId",
+  },
 };
 
 const insert_data = (data) => {
@@ -23,24 +35,43 @@ const insert_data = (data) => {
       let value = item[column];
       if (typeof value === "string") {
         return `'${value.replace(/'/g, "''")}'`; // Properly escape single quotes in strings
-      } else if (value === null || value === undefined || value === "") {
+      } else if (
+        value === null ||
+        value === undefined ||
+        value === "" ||
+        value === "NULL"
+      ) {
         return "NULL"; // Explicitly handle null, undefined, and empty string values
       } else {
         return `'${JSON.stringify(value)}'`; // Convert other data types to JSON string and quote
       }
     });
 
+    const idCard = (() => {
+      return Object.prototype.hasOwnProperty.call(item, "idCard")
+        ? item.idCard
+        : null;
+    })();
+
     if (
       tableConfig[item.tableName] &&
       columns.includes(tableConfig[item.tableName].idColumn)
     ) {
       const config = tableConfig[item.tableName];
-      let updateColumns = config.updateColumns.filter(col => columns.includes(col));
-      
-      let updateSet = updateColumns.map(col => {
-        let valueIndex = columns.indexOf(col);
-        return `"${col}" = ${values[valueIndex] === "''" ? "NULL" : values[valueIndex]}`;
-      }).join(", ");
+      let updateColumns = config.updateColumns.filter((col) =>
+        columns.includes(col)
+      );
+
+      let updateSet = updateColumns
+        .map((col) => {
+          let valueIndex = columns.indexOf(col);
+          return `"${col}" = ${
+            values[valueIndex] === "''" ? "NULL" : values[valueIndex]
+          }`;
+        })
+        .join(", ");
+
+      // console.log(updateSet)
 
       // If no update columns are present, set the first configurable column to NULL
       if (!updateSet && config.updateColumns.length) {
@@ -55,35 +86,72 @@ const insert_data = (data) => {
         queries.push(`DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM public.user WHERE "userNumberId" = ${idValue}) THEN
-    IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${config.idColumn}" = ${idValue}) THEN
-      UPDATE public.${item.tableName} SET ${updateSet} WHERE "${config.idColumn}" = ${idValue};
+    IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+      UPDATE public.${item.tableName} SET ${updateSet} WHERE "${
+          config.idColumn
+        }" = ${idValue};
     ELSE
-      INSERT INTO public.${item.tableName} (${columns.map(col => `"${col}"`).join(", ")}) VALUES (${values
-        .map(value => (value === "''" ? "NULL" : value))
-        .join(", ")});
+      INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
     END IF;
   END IF;
 END $$;`);
-      } else {
-        // Regular logic for other tables
+      } else if (item.tableName == "student") {
         queries.push(`DO $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${config.idColumn}" = ${idValue}) THEN
-    UPDATE public.${item.tableName} SET ${updateSet} WHERE "${config.idColumn}" = ${idValue};
-  ELSE
-    INSERT INTO public.${item.tableName} (${columns.map(col => `"${col}"`).join(", ")}) VALUES (${values
-      .map(value => (value === "''" ? "NULL" : value))
-      .join(", ")});
+  IF NOT EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+  INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
   END IF;
 END $$;`);
+      } else if (item.tableName === "guardian_student") {
+        // Regular logic for other tables
+        queries.push(`
+UPDATE public.${item.tableName}
+SET ${updateSet}
+WHERE "${config.idColumn}" = ${idValue};
+        `);
+      } else if (item.tableName == "user") {
+        queries.push(`
+UPDATE public.${item.tableName}
+SET ${updateSet}
+WHERE "${config.idColumn}" = ${idValue};
+        `);
+      } else if (item.tableName == "student_UPDATEONLY" && idValue !== "NULL") {
+        queries.push(`DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+          INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
+          END IF;
+        END $$;`);
+      } else if (item.tableName == "guardian") {
+        queries.push(
+          `DELETE FROM public.${item.tableName} WHERE ${updateSet};`
+        );
       }
     } else {
       // Build the standard insert query for other cases
       queries.push(
         `INSERT INTO public.${item.tableName} (${columns
-          .map(column => `"${column}"`)
+          .map((column) => `"${column}"`)
           .join(", ")}) VALUES (${values
-          .map(value => (value === "''" ? "NULL" : value))
+          .map((value) => (value === "''" ? "NULL" : value))
           .join(", ")});`
       );
     }
