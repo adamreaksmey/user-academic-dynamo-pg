@@ -51,8 +51,12 @@ const guardiansToBeReplaced = [
     replacedName: "Vattanac  Bank",
     toBeUpdatedId: "39262db6-78e0-4e1e-97d5-cdc10264dfb5"
   },
+  {
+    replacedName: "CAMMA  MICROFINANCE LIMITED",
+    toBeUpdatedId: "b90c50d5-c236-490d-b5dd-8363e9c339be"
+  },
 
-  "CAMMA  MICROFINANCE LIMITED",
+  
   "Corich  Microfinance PLC.",
   "FOREIGN  TRADE BANK OF CAMBODIA",
   "G  B MFI",
