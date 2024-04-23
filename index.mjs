@@ -12,6 +12,7 @@ import guardians from "./logs/academic/guardians.mjs";
 
 import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 import { promises as pfs } from "fs";
+import guardiansToBeReplaced from "./map/guardians.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,15 +28,28 @@ const __dirname = dirname(__filename);
  *  manually remove them yourself.
  */
 const main = async (__filename, __dirname) => {
-
   let USERS_PRODUCTION = [];
   let STUDENTS_PRODUCTION = [];
   let STUDENT_GUARDIAN_PRODUCTION = [];
 
   /**
    *  Mapping student_guardian
-   *
    */
+  const lms_user = "./input_sql/user.sql";
+  USERS_PRODUCTION = await processSqlBackup(null, lms_user);
+
+  const mappedUSERS_PRODUCTION = USERS_PRODUCTION.map((data) => {
+    // const foundMapped = guardiansToBeReplaced.find((guardian) => )
+    return {
+      // guardianName: guardiansToBeReplaced,
+    };
+  });
+
+  console.log(USERS_PRODUCTION.length);
+
+  // console.log(USERS_PRODUCTION)
+
+  return;
   const usersPath = "./generated_sql/production/lms-prod-user.sql";
   USERS_PRODUCTION = await processSqlBackup("user", usersPath);
 
@@ -44,8 +58,6 @@ const main = async (__filename, __dirname) => {
     "student_UPDATEONLY",
     studentsPath
   );
-
-  return;
   console.log(ASSIGN_STUDENT_TO_GUARDIAN);
 
   const qResponse_finalStudentUPDATE = insert_data(ASSIGN_STUDENT_TO_GUARDIAN);

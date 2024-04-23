@@ -10,7 +10,7 @@ const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
 const incrementor = 0;
 import { dobHandlder } from "./data.mjs";
 
-export const processSqlBackup = async (tableName, filePath) => {
+export const processSqlBackup = async (tableName = null, filePath) => {
   const sqlFileContent = await fs.readFile(filePath, { encoding: "utf8" });
   const objectsContent = (await sqlToObjects(sqlFileContent)).map(
     replaceNullWithEmptyString
@@ -58,7 +58,7 @@ export const processSqlBackup = async (tableName, filePath) => {
           status: "start",
           profile: {
             position: data?.position?.replaceAll("'", "`") || "",
-            phone: data.phone
+            phone: data.phone,
           },
           uniqueKey: data?.idCard,
           campusId: ibfCampusId,
