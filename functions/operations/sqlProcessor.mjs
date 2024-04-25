@@ -3,7 +3,7 @@ import { sqlToObjects } from "./sqlToObjects.mjs";
 import { fileURLToPath, pathToFileURL } from "url";
 import { randomUUID } from "crypto";
 import { dirname, join } from "path";
-import courses from "../../logs/lms/courses.mjs";
+// import courses from "../../logs/lms/courses.mjs";
 
 const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
 const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
@@ -206,14 +206,14 @@ const FETCHED_COURSES_USERS = async () => {
   return COURSES_USERS;
 };
 
-const COURSE_INFORMATION = (courseId) => {
-  const courseInfo = courseId
-    ? courses.find((data) => data.lmsCourseId == courseId)
-    : null;
+// const COURSE_INFORMATION = (courseId) => {
+//   const courseInfo = courseId
+//     ? courses.find((data) => data.lmsCourseId == courseId)
+//     : null;
 
-  return {
-    title: courseInfo ? courseInfo.title : null,
-    structureRecordId: courseInfo ? courseInfo.structureRecordId : null,
-    groupStructureId: courseInfo ? courseInfo.groupStructureId : null,
-  };
-};
+//   return {
+//     title: courseInfo ? courseInfo.title : null,
+//     structureRecordId: courseInfo ? courseInfo.structureRecordId : null,
+//     groupStructureId: courseInfo ? courseInfo.groupStructureId : null,
+//   };
+// };

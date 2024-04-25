@@ -1,7 +1,7 @@
 const tableConfig = {
   user: {
-    updateColumns: ["guardianId", "guardianName"],
-    idColumn: "userNumberId",
+    updateColumns: ["guardianId", "guardianName", "employer"],
+    idColumn: "idCard",
   },
   student: {
     updateColumns: ["groupStructureId", "structureRecordId"],
@@ -34,7 +34,7 @@ const insert_data = (data) => {
     let values = columns.map((column) => {
       let value = item[column];
       if (typeof value === "string") {
-        return `'${value.replace(/'/g, "''")}'`; // Properly escape single quotes in strings
+        return `'${value.replace(/'/g, "`")}'`; // Properly escape single quotes in strings
       } else if (
         value === null ||
         value === undefined ||

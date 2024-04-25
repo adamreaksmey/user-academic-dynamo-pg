@@ -12,6 +12,7 @@ import guardians from "./logs/academic/guardians.mjs";
 
 import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 import { promises as pfs } from "fs";
+import guardiansToBeReplaced from "./map/guardians.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,53 +33,119 @@ const main = async (__filename, __dirname) => {
   let GUARDIANS_DELETION_PRODUCTION = [];
 
   /**
-   *  Mapping student_guardian
+   * Mapping student to guardian
+   * 
    */
-  // const lms_user = "./input_sql/user.sql";
-  // USERS_PRODUCTION = await processSqlBackup("user", lms_user).then((data) => {
-  //   sqlFileOutPutGenerator(
-  //     insert_data(data),
-  //     __dirname,
-  //     fs,
-  //     path,
-  //     join,
-  //     "./generated_sql/lms-service/update/user.READY.sql"
-  //   );
-  // });
 
-  // const student_academic = "./input_sql/guardian_student.sql";
-  // STUDENT_GUARDIAN_PRODUCTION = await processSqlBackup(
-  //   "guardian_student",
-  //   student_academic
-  // ).then((data) => {
-  //   sqlFileOutPutGenerator(
-  //     insert_data(data),
-  //     __dirname,
-  //     fs,
-  //     path,
-  //     join,
-  //     "./generated_sql/lms-service/update/guardian_student.READY.sql"
-  //   );
-  // });
+  /**
+   *  Mapping user to guardian
+   */
+  const lms_user = "./input_sql/user.sql";
+  USERS_PRODUCTION = await processSqlBackup("TESTING", lms_user);
 
-  const guardian_academic = "./input_sql/guardian.sql";
-  GUARDIANS_DELETION_PRODUCTION = await processSqlBackup(
-    "guardian",
-    guardian_academic
-  ).then((data) => {
+  console.log("email ___");
+  console.log(USERS_PRODUCTION.filter((d) => d.email == "___").length);
+
+  console.log("guardianName & guardianId exists ___");
+  console.log(
+    USERS_PRODUCTION.filter(
+      (d) => d.guardianName && d.guardianNameId && d.email == "___"
+    ).length
+  );
+
+  console.log("employer doesnt exist");
+  console.log(USERS_PRODUCTION.filter((d) => !d.employer).length);
+
+  console.log("employer exists but no guardianName and guardianId case ___");
+  console.log(
+    USERS_PRODUCTION.filter(
+      (d) => d.employer && !d.guardianName && !d.guardianNameId
+    ).length
+  );
+
+  USERS_PRODUCTION = USERS_PRODUCTION.filter(
+    (d) =>
+      d.employer &&
+      !d.guardianName &&
+      !d.guardianNameId &&
+      d.employer !== "Sala.co" &&
+      d.employer !== "Other" &&
+      d.employer !== "IBF" &&
+      d.employer !== "ABC" &&
+      d.employer !== "ibf" &&
+      // d.employer !== "KKCM" &&
+      d.employer !== "cnguy@paragoniu.edu.kh"
+  ).map((data) => {
+    const activePeopleCase = "Active People''s Plc.";
+    let replacedActivePeople = "Active People's Plc.";
+
+    const guardianName = () => {
+      if (data.employer == activePeopleCase) return replacedActivePeople;
+      // if (data.employer == "KKCM") return "KKCM" + " " + "employer";
+    };
+
+    // Preprocess guardians to a Map for quick access
+    const guardianMap = new Map(
+      guardiansToBeReplaced.map((guardian) => {
+        const guardianName = guardian.replacedName
+          .replace(/ +(?= )/g, "")
+          .trim();
+        return [guardianName, guardian];
+      })
+    );
+
+    const guardianMap_ = new Map(
+      guardians.map((guardian) => {
+        const guardianName = (guardian.firstName + guardian.lastName)
+          .replace(/ +(?= )/g, "")
+          .trim();
+        return [guardianName, guardian];
+      })
+    );
+
+    // console.log(guardianName())
+    return {
+      tableName: "user",
+      idCard: data.idCard,
+      guardianName: guardianName(),
+      guardianId:
+        guardianMap.get(guardianName())?.toBeUpdatedId ||
+        guardianMap_.get(guardianName())?.guardianId,
+      employer: guardianName()
+    };
+  });
+
+  console.log("before filtered");
+  console.log(USERS_PRODUCTION.length);
+
+  console.log("after filtered");
+  console.log(
+    USERS_PRODUCTION.filter((d) => d.guardianId && d.guardianName).length
+  );
+
+  sqlFileOutPutGenerator(
+    insert_data(USERS_PRODUCTION.filter((d) => d.guardianId && d.guardianName)),
+    __dirname,
+    fs,
+    path,
+    join,
+    "./generated_sql/lms-service/update/user.ASSIGN.sql"
+  );
+
+  return;
+
+  USERS_PRODUCTION = await processSqlBackup("user", lms_user).then((data) => {
     sqlFileOutPutGenerator(
       insert_data(data),
       __dirname,
       fs,
       path,
       join,
-      "./generated_sql/lms-service/update/guardian.READY.sql"
+      "./generated_sql/lms-service/update/user.ASSIGN.sql"
     );
   });
 
   // console.log(USERS_PRODUCTION)
-
-  return;
 
   const qResponse_finalStudentUPDATE = insert_data(ASSIGN_STUDENT_TO_GUARDIAN);
 
