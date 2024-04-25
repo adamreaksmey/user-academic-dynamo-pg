@@ -29,13 +29,9 @@ const __dirname = dirname(__filename);
  */
 const main = async (__filename, __dirname) => {
   let USERS_PRODUCTION = [];
+  let STUDENTS = [];
   let STUDENT_GUARDIAN_PRODUCTION = [];
   let GUARDIANS_DELETION_PRODUCTION = [];
-
-  /**
-   * Mapping student to guardian
-   * 
-   */
 
   /**
    *  Mapping user to guardian
@@ -111,28 +107,78 @@ const main = async (__filename, __dirname) => {
       guardianId:
         guardianMap.get(guardianName())?.toBeUpdatedId ||
         guardianMap_.get(guardianName())?.guardianId,
-      employer: guardianName()
+      employer: guardianName(),
     };
   });
 
-  console.log("before filtered");
-  console.log(USERS_PRODUCTION.length);
+  const idCardForStudents = [];
+  let mappedIdCardForStudents = [];
 
-  console.log("after filtered");
-  console.log(
-    USERS_PRODUCTION.filter((d) => d.guardianId && d.guardianName).length
+  for (const record of USERS_PRODUCTION) {
+    idCardForStudents.push({
+      idCard: record.idCard,
+      guardianId: record.guardianId,
+    });
+  }
+
+  mappedIdCardForStudents = new Map(
+    idCardForStudents.map((data) => {
+      return [data.idCard, data];
+    })
   );
 
+  const student = "./input_sql/student.sql";
+  STUDENTS = await processSqlBackup("___", student);
+  const Mapped_Student = new Map(
+    STUDENTS.map((data) => {
+      return [data.studentId, data];
+    })
+  );
+
+  const student_guardian = "./input_sql/guardian_student.sql";
+  STUDENT_GUARDIAN_PRODUCTION = await processSqlBackup("___", student_guardian);
+  const Mapped_Guardian_Student = new Map(
+    STUDENT_GUARDIAN_PRODUCTION.map((data) => {
+      return [data.studentId, data];
+    })
+  );
+
+  // Filter and create a new array for students without guardians
+  let studentsWithoutGuardians = [];
+  for (let [studentId, studentData] of Mapped_Student) {
+    if (!Mapped_Guardian_Student.has(studentId)) {
+      // If studentId not found in guardian mapping, add to new array
+      studentsWithoutGuardians.push(studentData);
+    }
+  }
+
+  // studentsWithoutGuardians = new Map(
+  //   studentsWithoutGuardians.map((data) => {
+  //     return [data.idCard, data];
+  //   })
+  // );
+
+  // console.log(Mapped_Student_Academic);
+  const MappedGuardianStudent = studentsWithoutGuardians
+    .map((data) => {
+      return {
+        tableName: "guardian_student",
+        studentId: data.studentId,
+        guardianId: mappedIdCardForStudents.get(data.idCard)?.guardianId,
+      };
+    })
+    .filter((g) => g.guardianId);
+
   sqlFileOutPutGenerator(
-    insert_data(USERS_PRODUCTION.filter((d) => d.guardianId && d.guardianName)),
+    insert_data(MappedGuardianStudent),
     __dirname,
     fs,
     path,
     join,
-    "./generated_sql/lms-service/update/user.ASSIGN.sql"
+    "./generated_sql/lms-service/update/guardian_student.ASSIGN.sql"
   );
 
-  return;
+  return console.log(MappedGuardianStudent);
 
   USERS_PRODUCTION = await processSqlBackup("user", lms_user).then((data) => {
     sqlFileOutPutGenerator(

@@ -116,11 +116,18 @@ BEGIN
 END $$;`);
       } else if (item.tableName === "guardian_student") {
         // Regular logic for other tables
-        queries.push(`
-UPDATE public.${item.tableName}
-SET ${updateSet}
-WHERE "${config.idColumn}" = ${idValue};
-        `);
+        queries.push(`DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
+          config.idColumn
+        }" = ${idValue}) THEN
+          INSERT INTO public.${item.tableName} (${columns
+          .map((col) => `"${col}"`)
+          .join(", ")}) VALUES (${values
+          .map((value) => (value === "''" ? "NULL" : value))
+          .join(", ")});
+          END IF;
+        END $$;`);
       } else if (item.tableName == "user") {
         queries.push(`
 UPDATE public.${item.tableName}
