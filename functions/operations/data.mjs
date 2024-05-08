@@ -89,7 +89,6 @@ export const updateUserByName = (usersArray, name, newDetails) => {
 // recursive functions to get lesson children
 export const calculateLessonCount = async (lessons) => {
   let countAll = 0;
-  let ids = [];
 
   for (const lesson of lessons) {
     if (lesson.children && lesson.children.length > 0) {
