@@ -8,8 +8,8 @@ const tableConfig = {
     idColumn: "idCard",
   },
   lms_courses_users: {
-    updateColumns: ["courseId"],
-    idColumn: "userNumberId",
+    updateColumns: ["courseProgress"],
+    idColumn: "courseUserId",
   },
   guardian_student: {
     updateColumns: ["guardianId"],
@@ -83,24 +83,9 @@ const insert_data = (data) => {
 
       // Special logic for lms_courses_users
       if (item.tableName === "lms_courses_users") {
-        queries.push(`DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM public.user WHERE "userNumberId" = ${idValue}) THEN
-    IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${
-          config.idColumn
-        }" = ${idValue}) THEN
-      UPDATE public.${item.tableName} SET ${updateSet} WHERE "${
-          config.idColumn
-        }" = ${idValue};
-    ELSE
-      INSERT INTO public.${item.tableName} (${columns
-          .map((col) => `"${col}"`)
-          .join(", ")}) VALUES (${values
-          .map((value) => (value === "''" ? "NULL" : value))
-          .join(", ")});
-    END IF;
-  END IF;
-END $$;`);
+        queries.push(`UPDATE public.${item.tableName}
+        SET ${updateSet}
+        WHERE "${config.idColumn}" = ${idValue};`);
       } else if (item.tableName == "student") {
         queries.push(`DO $$
 BEGIN
