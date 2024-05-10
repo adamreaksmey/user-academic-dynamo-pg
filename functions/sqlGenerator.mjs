@@ -127,13 +127,12 @@ BEGIN
   END IF;
 END $$;`);
       } else if (item.tableName == "user") {
-        queries.push(`DO $$
-    BEGIN
-      IF EXISTS (SELECT 1 FROM public.${item.tableName} WHERE "${config.idColumn}" = ${idValue}) THEN
-        UPDATE public.${item.tableName} SET ${updateSet} WHERE "${config.idColumn}" = ${idValue};
-      END IF;
-    END $$;
-        `);
+        queries.push(`
+UPDATE public.${item.tableName}
+SET ${updateSet}
+WHERE "${config.idColumn}" = ${idValue}
+  AND ("userName" IS NULL OR "userName" = '');
+      `);
       } else if (item.tableName == "student_UPDATEONLY" && idValue !== "NULL") {
         queries.push(`DO $$
         BEGIN
