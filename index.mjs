@@ -40,6 +40,15 @@ const main = async (__filename, __dirname) => {
   const mappedUsers = mergedUsers.filter(
     (user) => ObjectHasKey(user, "userName") && user.userName
   );
+
+  sqlFileOutPutGenerator(
+    insert_data(mappedUsers),
+    __dirname,
+    fs,
+    path,
+    join,
+    "generated_sql/lms-service/update/user.KEYCLOAK_USERNAME.sql"
+  );
   return;
 };
 

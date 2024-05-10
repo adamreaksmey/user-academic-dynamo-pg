@@ -1,7 +1,7 @@
 const tableConfig = {
   user: {
-    updateColumns: ["guardianId", "guardianName"],
-    idColumn: "userNumberId",
+    updateColumns: ["userName"],
+    idColumn: "idCard",
   },
   student: {
     updateColumns: ["groupStructureId", "structureRecordId"],
