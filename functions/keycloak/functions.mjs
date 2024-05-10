@@ -4,6 +4,8 @@ let refreshToken = ``;
 const client_id = `security-admin-console`;
 let accessToken = `eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFM3cyN2x0MTNiRHZ1MkowdDlIbGxrT2ZRSC1ucUQ0d0Rtd012dE1IeklNIn0.eyJleHAiOjE3MTUzMjczMTQsImlhdCI6MTcxNTMyNzI1NCwiYXV0aF90aW1lIjoxNzE1MzIwODMwLCJqdGkiOiIwMGZkZWEyNC1jYThiLTRiMGItOTE0NS02ZTYwOWRkN2MyNmYiLCJpc3MiOiJodHRwczovL3NpZ25pbi5pYmZraC5vcmcvcmVhbG1zL21hc3RlciIsInN1YiI6IjMyZGE4ZDcwLTdkYjctNGIyMS04NzY1LTI4YTBlYzljNDVmOSIsInR5cCI6IkJlYXJlciIsImF6cCI6InNlY3VyaXR5LWFkbWluLWNvbnNvbGUiLCJub25jZSI6IjMyZTZiYzFjLTAzODctNDlhNy04MWNhLWJjODY4YmMxN2I3OCIsInNlc3Npb25fc3RhdGUiOiJiNTA2MGVmMi0zNzYzLTRhZGMtODhmNi1lODI3NzE5MGQwMDAiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHBzOi8vc2lnbmluLmliZmtoLm9yZyJdLCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwic2lkIjoiYjUwNjBlZjItMzc2My00YWRjLTg4ZjYtZTgyNzcxOTBkMDAwIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbiJ9.Rgm2ZDK1mQr4WEawInbvzHPfCe-4IFSBZECFNrOiA3DVHktHnTr6NfJ-JsC070UQu3HodLSNmJX-0fa4GSsnxLNGxCbqTsEt0t9SjVUvUK3l7Uz9j9aZUm17hkBk06yHXHObLl-_dkwebtxGEomVHNRPuzVu6zokBOUzQj19C_RGmeC_shgBxGvZpaVqOBPZ_ZddEghOOdmbf8L0FUK_-L-Y-Mcxqwy1lOzmTvKAtnqPnaatD8BjFb7BOC7A5aVluKxRjB3udPR9icbIyKx9T1bbtznNVLrp3OOtzIORmcmIlRp9B1ztz7nUoc7lTof2tnQoeRpoS4cI76YZn1-16w`;
 
+class UnauthorizedError extends Error {}
+
 export const getUserInfoFromKeyCloak = async (
   userId = "9ca1ae93-7fc7-44ce-bb27-91bec68d3b7d"
 ) => {
@@ -26,6 +28,7 @@ export const getUserInfoFromKeyCloak = async (
       console.error(`Error fetching data: ${error.message}`);
       if (error instanceof UnauthorizedError && attempt < 2) {
         console.log("Attempting to refresh token and retry...");
+        
         const newTokens = await refreshKeyCloakToken();
         if (newTokens) {
           return fetchDataWithRetry(accessToken, attempt + 1);
@@ -66,8 +69,6 @@ const refreshKeyCloakToken = async () => {
     return null;
   }
 };
-
-class UnauthorizedError extends Error {}
 
 const safeFetch = async (url, options, retries = 5) => {
   try {
