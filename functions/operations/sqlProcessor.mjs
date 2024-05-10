@@ -3,7 +3,6 @@ import { sqlToObjects } from "./sqlToObjects.mjs";
 import { fileURLToPath, pathToFileURL } from "url";
 import { randomUUID } from "crypto";
 import { dirname, join } from "path";
-import courses from "../../logs/lms/courses.mjs";
 
 const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
 const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
@@ -15,72 +14,26 @@ export const processSqlBackup = async (tableName, filePath) => {
   const objectsContent = (await sqlToObjects(sqlFileContent)).map(
     replaceNullWithEmptyString
   );
-
   let formattedContent = [];
-  let totalNumberOfUserFound = [];
-  let usersNotFound = [];
-  let usersWithoutIdCard = [];
 
-  if (tableName === "student") {
-    const COURSES_USERS = await FETCHED_COURSES_USERS();
-    for (const data of objectsContent) {
-      const userFound = COURSES_USERS.find(
-        (user) => user.userNumberId === data.userNumberId
-      );
+  if (tableName == "user") {
+    // Filtering idCards & userId
+    formattedContent = objectsContent.filter(
+      (u) => Object.prototype.hasOwnProperty.call(u, "idCard") && u.idCard
+    )
 
-      if (!userFound) {
-        usersNotFound.push(data);
-      }
+    formattedContent = formattedContent.map((data) => {
+      return {
+        tableName,
+        idCard: data.idCard,
+        userId: data.userId,
+      };
+    });
 
-      if (
-        !Object.prototype.hasOwnProperty.call(data, "idCard") &&
-        !data.idCard
-      ) {
-        usersWithoutIdCard.push(data);
-      }
-
-      const courseInfo = COURSE_INFORMATION(userFound?.courseId);
-
-      if (userFound) {
-        totalNumberOfUserFound.push(userFound);
-        formattedContent.push({
-          tableName,
-          schoolId: ibfProdSchoolId,
-          studentId: randomUUID(),
-          idCard: data?.idCard || "",
-          firstName: data?.firstName || "",
-          lastName: data?.lastName || "",
-          firstNameNative: data?.firstName || "",
-          lastNameNative: data?.lastName || "",
-          gender: data?.gender.toLowerCase() || "",
-          dob: dobHandlder(data.dob) || "",
-          remark: [data.remark?.replaceAll("'", "`") ?? ""],
-          status: "start",
-          profile: {
-            position: data?.position?.replaceAll("'", "`") || "",
-            phone: data.phone
-          },
-          uniqueKey: data?.idCard,
-          campusId: ibfCampusId,
-          groupStructureId: courseInfo.groupStructureId,
-          structureRecordId: courseInfo.structureRecordId,
-          _employer:
-            data?.employer == "" || !data?.employer ? null : data?.employer,
-          userNumberId: data?.userNumberId,
-        });
-      }
-    }
-  } else {
-    formattedContent = objectsContent;
+    return formattedContent;
   }
 
-  // console.log("Total numbers of users from lms", formattedContent.length);
-  // console.log(
-  //   "Total numbers of users found in lms_courses",
-  //   totalNumberOfUserFound.length
-  // );
-  // console.log("Users not found in course", usersNotFound);
-  // console.log("Users without idCard", usersWithoutIdCard);
+  formattedContent = objectsContent;
 
   return formattedContent;
 };
