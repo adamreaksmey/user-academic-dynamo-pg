@@ -3,6 +3,7 @@ import { sqlToObjects } from "./sqlToObjects.mjs";
 import { fileURLToPath, pathToFileURL } from "url";
 import { randomUUID } from "crypto";
 import { dirname, join } from "path";
+import { getUserInfoFromKeyCloak } from "../keycloak/functions.mjs";
 
 const ibfProdSchoolId = "61f17951-d509-4b60-967b-a84442f949b6";
 const ibfCampusId = "76044dab-2031-4b66-bf0c-be3c273f0687";
@@ -22,16 +23,27 @@ export const processSqlBackup = async (tableName, filePath) => {
       .filter((u) => ObjectHasKey(u, "idCard") && u.idCard)
       .filter((_u) => ObjectHasKey(_u, "userId") && _u.userId);
 
-    formattedContent = formattedContent.map((data) => {
-      return {
-        tableName,
-        idCard: data.idCard,
-        userId: data.userId,
-        userName: "draft",
-      };
-    });
+    // Process in batches
+    const batchSize = 1000;
+    const batchedResults = [];
 
-    return formattedContent;
+    for (let i = 0; i < 2000; i += batchSize) {
+      console.log("Number of user", i);
+      const batch = formattedContent.slice(i, i + batchSize);
+      const results = await Promise.all(
+        batch.map(async (data) => {
+          return {
+            tableName,
+            idCard: data.idCard,
+            userId: data.userId,
+            userName: await getUserInfoFromKeyCloak(data.userId),
+          };
+        })
+      );
+      batchedResults.push(...results);
+    }
+
+    return batchedResults;
   }
 
   formattedContent = objectsContent;
