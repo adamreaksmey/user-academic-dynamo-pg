@@ -85,3 +85,7 @@ export const updateUserByName = (usersArray, name, newDetails) => {
 
   return false; // Return false if the user was not found
 };
+
+export const ObjectHasKey = (obj, key) => {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+};
