@@ -1,4 +1,5 @@
 import moment from "moment";
+import fetch from "node-fetch";
 
 export const variousDateHandler = (date) => {
   return moment(date).format("YYYY-MM-DD");
@@ -85,3 +86,41 @@ export const updateUserByName = (usersArray, name, newDetails) => {
 
   return false; // Return false if the user was not found
 };
+
+export const ObjectHasKey = (obj, key) => {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+};
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Safe fetch function with retries
+export const safeFetch = async (url, options, retries = 5) => {
+  try {
+    const response = await fetch(url, options);
+    if (response?.status === 404) {
+      console.log("Not Found:", url);
+      return null; // Return null or some other indicator of a 'Not Found' response
+    }
+    if (response.status === 401) {
+      console.log("Unauthorized")
+    }
+    if (!response.ok) {
+      console.log(response)
+      throw new Error(`HTTP error! status: ${response?.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch error:", error.message);
+    if (retries > 0 && response.status !== 404) {
+      console.log(`Retrying... (${retries} retries left)`);
+      await delay(1000); // Wait 1 second before retrying
+      return await safeFetch(url, options, retries - 1);
+    } else {
+      throw new Error("Max retries reached or Not Found");
+    }
+  }
+};
+
+
