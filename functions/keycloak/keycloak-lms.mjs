@@ -6,30 +6,29 @@ const options = {
   method: "POST",
   headers: {
     Accept: "application/json",
-    "Content-Type": "application/json", // Include Content-Type header
+    "Content-Type": "application/json",
   },
 };
 const IBF_SCHOOL = "61f17951-d509-4b60-967b-a84442f949b6";
 
-export const createGuardianOnKeyCloak = async () => {
+export const createGuardianOnKeyCloak = async (user) => {
   const params = {
-    username: "d.guardian3",
-    firstName: "Draft",
-    lastName: "Guardian 3",
-    email: "draftGuardian@sala.co",
-    phone: "099887766",
-    password: "testing-password",
+    ...user,
+    password: "123456789",
     app: "lms",
     role: "Guardian",
     schoolId: IBF_SCHOOL,
   };
 
+  console.log(params)
+
   const response = await fetch(userServiceUrl, {
     ...options,
-    body: JSON.stringify(params), // Convert params object to JSON string
+    body: JSON.stringify(params),
   });
 
   if (!response.ok) {
+    console.log(response)
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
