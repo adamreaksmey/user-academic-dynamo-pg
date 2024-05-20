@@ -70,7 +70,7 @@ const refreshKeyCloakToken = async () => {
   }
 };
 
-const safeFetch = async (url, options, retries = 5) => {
+export const safeFetch = async (url, options, retries = 5) => {
   try {
     const response = await fetch(url, options);
     if (!response.ok) {
