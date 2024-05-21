@@ -2,3 +2,6 @@ Put your dynamoDB json file into the sources directory. accepts only one file.
 run node index.mjs
 
 enjoy :)
+
+// Regex to remove semi colons that arent at the last of the line:
+;(?=.*\S)
