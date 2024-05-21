@@ -17,3 +17,5 @@ generated_sql/*
 venv
 
 node_modules
+
+input_sql

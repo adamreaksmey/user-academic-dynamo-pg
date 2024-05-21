@@ -85,3 +85,21 @@ export const updateUserByName = (usersArray, name, newDetails) => {
 
   return false; // Return false if the user was not found
 };
+
+// recursive functions to get lesson children
+export const calculateLessonCount = async (lessons) => {
+  let countAll = 0;
+
+  for (const lesson of lessons) {
+    if (lesson.children && lesson.children.length > 0) {
+      // if lesson/activity has children, we count the progress of its child instead
+      const count = await calculateLessonCount(lesson.children);
+      countAll = countAll + count;
+    } else if (lesson.type == "lesson" || lesson.type == "certification") {
+      // for empty lesson
+    } else {
+      countAll++;
+    }
+  }
+  return countAll;
+};
