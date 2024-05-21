@@ -28,18 +28,13 @@ const __dirname = dirname(__filename);
  *  manually remove them yourself.
  */
 const main = async (__filename, __dirname) => {
-  let USERS_PRODUCTION = [];
-  let STUDENTS = [];
-  let STUDENT_GUARDIAN_PRODUCTION = [];
-  let GUARDIANS_DELETION_PRODUCTION = [];
   let LMS_COURSES_USERS = [];
-  let LMS_COURSES = [];
 
   /**
    *  Mapping user to guardian
    */
-  const lms_courses_users = "./input_sql/lms_courses_users_backup.sql";
-  LMS_COURSES_USERS = await processSqlBackup("TESTING", lms_courses_users).then(
+  const lms_users_path = "./input_sql/lms_courses_users_backup.sql";
+  LMS_COURSES_USERS = await processSqlBackup("guardian_student", lms_users_path).then(
     (data) => {
       sqlFileOutPutGenerator(
         insert_data(data),
@@ -47,7 +42,7 @@ const main = async (__filename, __dirname) => {
         fs,
         path,
         join,
-        "./generated_sql/lms-service/update/user.ASSIGN.sql"
+        "./generated_sql/academic-service/insert/v2.guardians.sql"
       );
     }
   );
