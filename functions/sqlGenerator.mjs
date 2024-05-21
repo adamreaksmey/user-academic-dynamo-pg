@@ -11,10 +11,10 @@ const tableConfig = {
     updateColumns: ["courseProgress"],
     idColumn: "courseUserId",
   },
-  guardian_student: {
-    updateColumns: ["guardianId"],
-    idColumn: "studentId",
-  },
+  // guardian_student: {
+  //   updateColumns: ["guardianId"],
+  //   idColumn: "studentId",
+  // },
   student_UPDATEONLY: {
     updateColumns: ["guardianId", "studentId"],
     idColumn: "studentId",

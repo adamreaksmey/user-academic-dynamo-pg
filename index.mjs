@@ -28,13 +28,13 @@ const __dirname = dirname(__filename);
  *  manually remove them yourself.
  */
 const main = async (__filename, __dirname) => {
-  let LMS_COURSES_USERS = [];
+  let LMS_USERS = [];
 
   /**
    *  Mapping user to guardian
    */
-  const lms_users_path = "./input_sql/lms_courses_users_backup.sql";
-  LMS_COURSES_USERS = await processSqlBackup("guardian_student", lms_users_path).then(
+  const lms_users_path = "";
+  LMS_USERS = await processSqlBackup("guardian_student", lms_users_path).then(
     (data) => {
       sqlFileOutPutGenerator(
         insert_data(data),

@@ -20,7 +20,7 @@ export const processSqlBackup = async (tableName = null, filePath) => {
 
   let formattedContent = [];
 
-  if (tableName === "student") {
+  if (tableName === "guardian_student") {
     for (const data of objectsContent) {
       formattedContent.push({
         tableName,
