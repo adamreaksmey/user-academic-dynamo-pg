@@ -41,9 +41,6 @@ const main = async (__filename, __dirname) => {
   const lms_courses_users = "./input_sql/lms_courses_users_backup.sql";
   LMS_COURSES_USERS = await processSqlBackup("TESTING", lms_courses_users);
 
-
-
-
   return;
 
   USERS_PRODUCTION = await processSqlBackup("user", lms_user).then((data) => {
@@ -56,21 +53,6 @@ const main = async (__filename, __dirname) => {
       "./generated_sql/lms-service/update/user.ASSIGN.sql"
     );
   });
-
-  // console.log(USERS_PRODUCTION)
-
-  const qResponse_finalStudentUPDATE = insert_data(ASSIGN_STUDENT_TO_GUARDIAN);
-
-  const outputPath_finalSTUDENT =
-    "./generated_sql/production/generated/student-guardian-update.sql";
-  sqlFileOutPutGenerator(
-    qResponse_finalStudentUPDATE,
-    __dirname,
-    fs,
-    path,
-    join,
-    outputPath_finalSTUDENT
-  );
 };
 
 main(__filename, __dirname).catch(console.error);
