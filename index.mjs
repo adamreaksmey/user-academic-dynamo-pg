@@ -39,20 +39,19 @@ const main = async (__filename, __dirname) => {
    *  Mapping user to guardian
    */
   const lms_courses_users = "./input_sql/lms_courses_users_backup.sql";
-  LMS_COURSES_USERS = await processSqlBackup("TESTING", lms_courses_users);
-
+  LMS_COURSES_USERS = await processSqlBackup("TESTING", lms_courses_users).then(
+    (data) => {
+      sqlFileOutPutGenerator(
+        insert_data(data),
+        __dirname,
+        fs,
+        path,
+        join,
+        "./generated_sql/lms-service/update/user.ASSIGN.sql"
+      );
+    }
+  );
   return;
-
-  USERS_PRODUCTION = await processSqlBackup("user", lms_user).then((data) => {
-    sqlFileOutPutGenerator(
-      insert_data(data),
-      __dirname,
-      fs,
-      path,
-      join,
-      "./generated_sql/lms-service/update/user.ASSIGN.sql"
-    );
-  });
 };
 
 main(__filename, __dirname).catch(console.error);
