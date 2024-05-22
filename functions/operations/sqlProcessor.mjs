@@ -25,11 +25,16 @@ export const processSqlBackup = async (tableName = null, filePath) => {
       formattedContent.push({
         tableName,
         uniqueKey: data.idCard,
+        // guardianName: data.guardianName,
         guardianId: data?.guardianId,
       });
     }
 
     formattedContent = formattedContent.filter((d) => d.guardianId);
+  } else if (tableName === "guardians") {
+    for (const data of objectsContent) {
+      formattedContent.push(data.guardianId);
+    }
   } else {
     formattedContent = objectsContent;
   }

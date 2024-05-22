@@ -29,24 +29,40 @@ const __dirname = dirname(__filename);
  */
 const main = async (__filename, __dirname) => {
   let LMS_USERS = [];
+  let GUARDIANS = [];
 
   /**
    *  Mapping user to guardian
    */
+  const guardians_path = "./input_sql/academic_guardians_22_05_2024.sql";
+  GUARDIANS = await await processSqlBackup("guardians", guardians_path);
+
   const lms_users_path = "./input_sql/lms_user_21_05_2024.sql";
-  LMS_USERS = await processSqlBackup("guardian_student", lms_users_path)
-  console.log(LMS_USERS)
-  // .then(
-  //   (data) => {
-  //     sqlFileOutPutGenerator(
-  //       insert_data(data),
-  //       __dirname,
-  //       fs,
-  //       path,
-  //       join,
-  //       "./generated_sql/academic-service/insert/v2.guardians.sql"
-  //     );
-  //   }
+  LMS_USERS = await processSqlBackup("guardian_student", lms_users_path).then(
+    (data) => {
+      sqlFileOutPutGenerator(
+        insert_data(
+          // excluding those that dont exist
+          data.filter((student) => GUARDIANS.includes(student.guardianId))
+        ),
+        __dirname,
+        fs,
+        path,
+        join,
+        "./generated_sql/academic-service/insert/v2.guardians.sql"
+      );
+    }
+  );
+
+  // console.log("before filter", LMS_USERS.length);
+  // console.log(
+  //   "after filter",
+  //   LMS_USERS.filter((student) => GUARDIANS.includes(student.guardianId)).length
+  // );
+
+  // console.log(
+  //   "undefined guardians",
+  //   LMS_USERS.filter((student) => !GUARDIANS.includes(student.guardianId))
   // );
   return;
 };
