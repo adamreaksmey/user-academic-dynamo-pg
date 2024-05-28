@@ -2,6 +2,8 @@ import fs from "fs";
 import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
 import path from "path";
+import { learningPath } from "./functions/data/learningPath.mjs";
+import { learningPath as stagingLearningPath } from "./functions/data/staging/learningPath.mjs";
 
 import {
   insert_data,
@@ -34,36 +36,35 @@ const main = async (__filename, __dirname) => {
   /**
    *  Mapping user to guardian
    */
-  const guardians_path = "./input_sql/academic_guardians_22_05_2024.sql";
-  GUARDIANS = await await processSqlBackup("guardians", guardians_path);
+  const calculateLessonCount = async (lessons) => {
+    let countAll = 0;
+    const ids = [];
 
-  const lms_users_path = "./input_sql/lms_user_21_05_2024.sql";
-  LMS_USERS = await processSqlBackup("guardian_student", lms_users_path).then(
-    (data) => {
-      sqlFileOutPutGenerator(
-        insert_data(
-          // excluding those that dont exist
-          data.filter((student) => GUARDIANS.includes(student.guardianId))
-        ),
-        __dirname,
-        fs,
-        path,
-        join,
-        "./generated_sql/academic-service/insert/v2.guardians.sql"
-      );
+    for (const lesson of lessons) {
+      if (lesson.children && lesson.children.length > 0) {
+        // Push ids
+        for (const child of lesson.children) {
+          ids.push(child.id);
+        }
+        // if lesson/activity has children, we count the progress of its child instead
+        const count = await calculateLessonCount(lesson.children);
+        countAll = countAll + count;
+      } else if (lesson.type == "lesson" || lesson.type == "certification") {
+        // for empty lesson
+      } else {
+        ids.push(lesson.id); // Assuming you want to push the lesson's id if it's not a lesson or certification
+        countAll++;
+      }
     }
-  );
+    // console.log(countAll);
+    // console.log(ids, ids.length);
+    return countAll;
+  };
 
-  // console.log("before filter", LMS_USERS.length);
-  // console.log(
-  //   "after filter",
-  //   LMS_USERS.filter((student) => GUARDIANS.includes(student.guardianId)).length
-  // );
+  calculateLessonCount(stagingLearningPath).then((result) => {
+    console.log(result);
+  });
 
-  // console.log(
-  //   "undefined guardians",
-  //   LMS_USERS.filter((student) => !GUARDIANS.includes(student.guardianId))
-  // );
   return;
 };
 
