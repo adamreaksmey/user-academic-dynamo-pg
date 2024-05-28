@@ -4,6 +4,7 @@ import { dirname, join } from "path";
 import path from "path";
 import { learningPath } from "./functions/data/learningPath.mjs";
 import { learningPath as stagingLearningPath } from "./functions/data/staging/learningPath.mjs";
+import { learningPath as meyLearningPath } from "./functions/data/production/learningPath.mjs";
 
 import {
   insert_data,
@@ -61,7 +62,7 @@ const main = async (__filename, __dirname) => {
     return countAll;
   };
 
-  calculateLessonCount(stagingLearningPath).then((result) => {
+  calculateLessonCount(meyLearningPath).then((result) => {
     console.log(result);
   });
 
