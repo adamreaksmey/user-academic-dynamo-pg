@@ -34,6 +34,15 @@ const main = async (__filename, __dirname) => {
   let LMS_USERS = [];
   let GUARDIANS = [];
 
+  const searchDelete = (tree, idToDelete) => {
+    let cleanTree = tree.filter((el) => el.id != idToDelete);
+    for (let i = 0; i < cleanTree.length; i++) {
+      if (cleanTree[i].children && cleanTree[i].children.length > 0) {
+        cleanTree[i].children = searchDelete(cleanTree[i].children, idToDelete);
+      }
+    }
+    return cleanTree;
+  };
   /**
    *  Mapping user to guardian
    */
@@ -57,14 +66,19 @@ const main = async (__filename, __dirname) => {
         countAll++;
       }
     }
-    // console.log(countAll);
-    // console.log(ids, ids.length);
     return countAll;
   };
 
   calculateLessonCount(meyLearningPath).then((result) => {
-    console.log(result);
+    console.log("Total learning path =>", result);
   });
+
+  fs.writeFileSync(
+    join(__dirname, "./functions/data/production/re-learningPath.mjs"),
+    `const learningPath = ${JSON.stringify(
+      searchDelete(meyLearningPath, "49f975eb-15aa-4e94-869e-93165fa67e1e")
+    )}`
+  );
 
   return;
 };
