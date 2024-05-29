@@ -89,21 +89,26 @@ export const updateUserByName = (usersArray, name, newDetails) => {
 // recursive functions to get lesson children
 export const calculateLessonCount = async (lessons) => {
   let countAll = 0;
+  const ids = [];
 
   for (const lesson of lessons) {
     if (lesson.children && lesson.children.length > 0) {
+      // Push ids
+      for (const child of lesson.children) {
+        ids.push(child.id);
+      }
       // if lesson/activity has children, we count the progress of its child instead
       const count = await calculateLessonCount(lesson.children);
       countAll = countAll + count;
     } else if (lesson.type == "lesson" || lesson.type == "certification") {
       // for empty lesson
     } else {
+      ids.push(lesson.id); // Assuming you want to push the lesson's id if it's not a lesson or certification
       countAll++;
     }
   }
   return countAll;
 };
-
 
 export const searchDelete = (tree, idToDelete) => {
   let cleanTree = tree.filter((el) => el.id != idToDelete);

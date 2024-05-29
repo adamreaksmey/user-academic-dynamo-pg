@@ -35,6 +35,14 @@ export const processSqlBackup = async (tableName = null, filePath) => {
     for (const data of objectsContent) {
       formattedContent.push(data.guardianId);
     }
+  } else if (tableName == "lms_courses_user") {
+    for (const data of objectsContent) {
+      formattedContent.push({
+        tableName,
+        courseProgress: Number(data.courseProgress),
+        ...data,
+      });
+    }
   } else {
     formattedContent = objectsContent;
   }

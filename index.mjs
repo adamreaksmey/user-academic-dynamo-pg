@@ -32,38 +32,80 @@ const __dirname = dirname(__filename);
  *  manually remove them yourself.
  */
 const main = async (__filename, __dirname) => {
-  let LMS_USERS = [];
-  let GUARDIANS = [];
+  const LMS_COURSE_USERS_ID = [];
+
+  const LMS_COURSE_USERS_ID_0 = [];
+  /**
+   *  BEFORE FILTER
+   */
+  const LMS_COURSE_USERS = await processSqlBackup(
+    "lms_courses_user",
+    "./input_sql/lms/lms_courses_users_29_05_2024.sql"
+  );
+  console.log("Before filter 100%", LMS_COURSE_USERS.length);
 
   /**
-   *  Mapping user to guardian
+   * Progress 0%
    */
-  const calculateLessonCount = async (lessons) => {
-    let countAll = 0;
-    const ids = [];
+  const filterOne = LMS_COURSE_USERS.filter((d) => d && d.courseProgress == 0);
+  fs.writeFileSync(
+    join(__dirname, "./logs/lms/logs/0.mjs"),
+    `${JSON.stringify(filterOne)}`
+  );
+  console.log("0% - ", filterOne.length);
 
-    for (const lesson of lessons) {
-      if (lesson.children && lesson.children.length > 0) {
-        // Push ids
-        for (const child of lesson.children) {
-          ids.push(child.id);
-        }
-        // if lesson/activity has children, we count the progress of its child instead
-        const count = await calculateLessonCount(lesson.children);
-        countAll = countAll + count;
-      } else if (lesson.type == "lesson" || lesson.type == "certification") {
-        // for empty lesson
-      } else {
-        ids.push(lesson.id); // Assuming you want to push the lesson's id if it's not a lesson or certification
-        countAll++;
-      }
+  /**
+   * Progress 1% - 99%
+   */
+  const filterTwo = LMS_COURSE_USERS.filter(
+    (d) => d && d.courseProgress >= 1 && d && d.courseProgress <= 99
+  );
+  fs.writeFileSync(
+    join(__dirname, "./logs/lms/logs/1-99.mjs"),
+    `${JSON.stringify(filterTwo)}`
+  );
+  console.log("1% - 99%", filterTwo.length);
+
+  /**
+   * Progress 100%
+   */
+  const filterThree = LMS_COURSE_USERS.filter(
+    (d) => d && d.courseProgress >= 100
+  );
+  fs.writeFileSync(
+    join(__dirname, "./logs/lms/logs/100.mjs"),
+    `${JSON.stringify(filterThree)}`
+  );
+  console.log("100% - ", filterThree.length);
+
+  return;
+
+  for (const iterator of LCU_FILTERED) {
+    LMS_COURSE_USERS_ID.push(iterator.userNumberId);
+  }
+
+  const LMS_USERS_PROGRESS = await processSqlBackup(
+    "lms_user_progress",
+    "./input_sql/lms/lms_user_progress_29_05_2024.sql"
+  );
+  console.log("Total lms user progress", LMS_USERS_PROGRESS.length);
+  const LUP_FILTERED = LMS_USERS_PROGRESS.filter((d) =>
+    LMS_COURSE_USERS_ID.includes(d.userNumberId)
+  );
+  console.log("Filter user progress from course user", LUP_FILTERED.length);
+
+  const counts = LUP_FILTERED.reduce((acc, obj) => {
+    // If the userNumberId is already a key in the accumulator, increment the count
+    if (acc[obj.userNumberId]) {
+      acc[obj.userNumberId]++;
+    } else {
+      // If the userNumberId is not a key in the accumulator, add it with a count of 1
+      acc[obj.userNumberId] = 1;
     }
-    return countAll;
-  };
+    return acc;
+  }, {});
 
-  calculateLessonCount(localLearningPath).then((result) => {
-    console.log("Total learning path =>", result);
-  });
+  console.log("Group by counts", Object.keys(counts).length);
 
   // fs.writeFileSync(
   //   join(__dirname, "./functions/data/production/re-learningPath.mjs"),
