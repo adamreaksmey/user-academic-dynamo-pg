@@ -5,6 +5,7 @@ import path from "path";
 import { learningPath } from "./functions/data/learningPath.mjs";
 import { learningPath as stagingLearningPath } from "./functions/data/staging/learningPath.mjs";
 import { learningPath as meyLearningPath } from "./functions/data/production/learningPath.mjs";
+import { learningPath as localLearningPath } from "./functions/data/local/learningPath.mjs";
 
 import {
   insert_data,
@@ -69,16 +70,16 @@ const main = async (__filename, __dirname) => {
     return countAll;
   };
 
-  calculateLessonCount(meyLearningPath).then((result) => {
+  calculateLessonCount(localLearningPath).then((result) => {
     console.log("Total learning path =>", result);
   });
 
-  fs.writeFileSync(
-    join(__dirname, "./functions/data/production/re-learningPath.mjs"),
-    `const learningPath = ${JSON.stringify(
-      searchDelete(meyLearningPath, "49f975eb-15aa-4e94-869e-93165fa67e1e")
-    )}`
-  );
+  // fs.writeFileSync(
+  //   join(__dirname, "./functions/data/production/re-learningPath.mjs"),
+  //   `const learningPath = ${JSON.stringify(
+  //     searchDelete(meyLearningPath, "49f975eb-15aa-4e94-869e-93165fa67e1e")
+  //   )}`
+  // );
 
   return;
 };
