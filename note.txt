@@ -6,6 +6,9 @@ enjoy :)
 // Regex to remove semi colons that arent at the last of the line:
 ;(?=.*\S)
 
+// Regex to remove array objects:
+\[\s*(\{[^}]*\}(?:,\s*\{[^}]*\})*)\s*\]
+
 \copy (SELECT 'INSERT INTO "lms_user_progress" ("activityId", "userNumberId") VALUES (''' || "activityId" || ''', ''' || "userNumberId" || ''');'
        FROM "lms_user_progress"
        WHERE "courseId" = 'edea75b8-93f2-494a-8e13-e51471fcef20')

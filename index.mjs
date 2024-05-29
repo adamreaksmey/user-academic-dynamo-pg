@@ -34,7 +34,17 @@ const __dirname = dirname(__filename);
 const main = async (__filename, __dirname) => {
   const LMS_COURSE_USERS_ID = [];
 
+  const users = await processSqlBackup(
+    "users",
+    "./input_sql/lms/lms_user_29_05_2024.sql"
+  );
+  console.log(users);
+
+  // -------- OPERATION 1 ----------
+  console.log("-------- OPERATION 1 ----------");
   const LMS_COURSE_USERS_ID_0 = [];
+  const LMS_COURSE_USERS_ID_1_99 = [];
+  const LMS_COURSE_USERS_ID_100 = [];
   /**
    *  BEFORE FILTER
    */
@@ -47,12 +57,16 @@ const main = async (__filename, __dirname) => {
   /**
    * Progress 0%
    */
-  const filterOne = LMS_COURSE_USERS.filter((d) => d && d.courseProgress == 0);
+  const filterOne = LMS_COURSE_USERS.filter((d) => d.courseProgress == 0);
   fs.writeFileSync(
     join(__dirname, "./logs/lms/logs/0.mjs"),
     `${JSON.stringify(filterOne)}`
   );
   console.log("0% - ", filterOne.length);
+  // Loop 1
+  for (const iterator of filterOne) {
+    LMS_COURSE_USERS_ID_0.push(iterator.userNumberId);
+  }
 
   /**
    * Progress 1% - 99%
@@ -65,6 +79,10 @@ const main = async (__filename, __dirname) => {
     `${JSON.stringify(filterTwo)}`
   );
   console.log("1% - 99%", filterTwo.length);
+  // Loop 2
+  for (const iterator of filterTwo) {
+    LMS_COURSE_USERS_ID_1_99.push(iterator.userNumberId);
+  }
 
   /**
    * Progress 100%
@@ -77,42 +95,39 @@ const main = async (__filename, __dirname) => {
     `${JSON.stringify(filterThree)}`
   );
   console.log("100% - ", filterThree.length);
-
-  return;
-
-  for (const iterator of LCU_FILTERED) {
-    LMS_COURSE_USERS_ID.push(iterator.userNumberId);
+  // Loop 3
+  for (const iterator of filterThree) {
+    LMS_COURSE_USERS_ID_100.push(iterator.userNumberId);
   }
 
-  const LMS_USERS_PROGRESS = await processSqlBackup(
+  // -------- OPERATION 2 ----------
+  console.log("-------- OPERATION 2 ----------");
+  const LMS_USER_PROGRESS = await processSqlBackup(
     "lms_user_progress",
     "./input_sql/lms/lms_user_progress_29_05_2024.sql"
   );
-  console.log("Total lms user progress", LMS_USERS_PROGRESS.length);
-  const LUP_FILTERED = LMS_USERS_PROGRESS.filter((d) =>
-    LMS_COURSE_USERS_ID.includes(d.userNumberId)
-  );
-  console.log("Filter user progress from course user", LUP_FILTERED.length);
 
-  const counts = LUP_FILTERED.reduce((acc, obj) => {
-    // If the userNumberId is already a key in the accumulator, increment the count
-    if (acc[obj.userNumberId]) {
-      acc[obj.userNumberId]++;
+  // Filter progress 0%
+  const counts_0 = LMS_USER_PROGRESS.filter((d) =>
+    LMS_COURSE_USERS_ID_0.includes(d.userNumberId)
+  ).reduce((acc, obj) => {
+    // Find the index of the userNumberId in the accumulator
+    const index = acc.findIndex(
+      (item) => item.userNumberId === obj.userNumberId
+    );
+
+    if (index !== -1) {
+      // If the userNumberId is already in the accumulator, increment the count
+      acc[index].count++;
     } else {
-      // If the userNumberId is not a key in the accumulator, add it with a count of 1
-      acc[obj.userNumberId] = 1;
+      // If the userNumberId is not in the accumulator, add it with a count of 1
+      acc.push({ userNumberId: obj.userNumberId, count: 1 });
     }
+
     return acc;
-  }, {});
+  }, []);
 
-  console.log("Group by counts", Object.keys(counts).length);
-
-  // fs.writeFileSync(
-  //   join(__dirname, "./functions/data/production/re-learningPath.mjs"),
-  //   `const learningPath = ${JSON.stringify(
-  //     searchDelete(meyLearningPath, "49f975eb-15aa-4e94-869e-93165fa67e1e")
-  //   )}`
-  // );
+  console.log(counts_0);
 
   return;
 };
