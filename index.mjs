@@ -35,15 +35,6 @@ const main = async (__filename, __dirname) => {
   let LMS_USERS = [];
   let GUARDIANS = [];
 
-  const searchDelete = (tree, idToDelete) => {
-    let cleanTree = tree.filter((el) => el.id != idToDelete);
-    for (let i = 0; i < cleanTree.length; i++) {
-      if (cleanTree[i].children && cleanTree[i].children.length > 0) {
-        cleanTree[i].children = searchDelete(cleanTree[i].children, idToDelete);
-      }
-    }
-    return cleanTree;
-  };
   /**
    *  Mapping user to guardian
    */
