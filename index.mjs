@@ -3,25 +3,28 @@ import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
 import path from "path";
 import { learningPath } from "./functions/data/production/learningPath.mjs";
+import { answerV1Table } from "./sources/QuestionsV1Table-ibf-prod.mjs";
 import {
   calculateLessonCount,
   calculateLessonCountBasedOnQA,
 } from "./functions/operations/data.mjs";
+import formatDynamoDBJson from "./functions/dynamo-formatter.mjs";
 
 import {
   insert_data,
   sqlFileOutPutGenerator,
 } from "./functions/sqlGenerator.mjs";
 import { processSqlBackup } from "./functions/operations/sqlProcessor.mjs";
-import guardians from "./logs/academic/guardians.mjs";
 
 import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 import { promises as pfs } from "fs";
-import guardiansToBeReplaced from "./map/guardians.mjs";
+
 import {
   __MASTER_MAPPER,
   __fetchUserAnswerFromQA,
   __filterQAonly,
+  __filter__FROM__QA,
+  duplicatedRemoved,
 } from "./functions/operations/_v1.filter.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,10 +50,20 @@ const main = async (__filename, __dirname) => {
     "./input_sql/lms/lms_user_29_05_2024.sql"
   );
 
+  // Setter with userNumberId -- useful for lms
   const usersMap = new Map(
     users.map((user) => {
       return [user.userNumberId, user];
     })
+  );
+
+  // Setter with userId -- useful for qa
+  const usersMap_userId = new Map(
+    users
+      .filter((data) => data.userId)
+      .map((user) => {
+        return [user.userId, user];
+      })
   );
 
   const lessonsCount = await calculateLessonCountBasedOnQA(learningPath); // should be 72
@@ -191,24 +204,120 @@ const main = async (__filename, __dirname) => {
   //   PROBLEMATIC_0,
   //   questionLearningPathId
   // );
-  // console.log("0% - ", qa_filter_responseOne.length);
+  // console.log("0% - ", qa_filter_responseOne);
 
   // -------- 1% - 99% Progress -------------
-  // const qa_filter_responseTwo = await __filterQAonly(
-  //   PROBLEMATIC_1_99,
-  //   questionLearningPathId
-  // );
-  // console.log("1% - 99%", qa_filter_responseTwo.length);
+  const qa_filter_responseTwo = await __filterQAonly(
+    PROBLEMATIC_1_99,
+    questionLearningPathId
+  );
+  console.log("1% - 99%", qa_filter_responseTwo.length);
 
   // -------- 100% Progress -------------
   const qa_filter_responseThree = await __filterQAonly(
     PROBLEMATIC_100,
     questionLearningPathId
   );
-  console.log("100% -", qa_filter_responseThree);
+  console.log("100% -", qa_filter_responseThree.length);
 
-  // -------- OPERATION 4 ( FROM QA-service SIDE, checks for answered questions but has no activityId ) ----------
+  // -------- OPERATION 4 ( FROM QA-SERVICE SIDE, checks for answered questions but has no activityId ) ----------
   console.log("-------- OPERATION 4 ----------");
+  /**
+   * Format QA-SERVICE data
+   */
+  const qaIds = [];
+  const qaAnswers = answerV1Table.Items;
+  const uniqueData = [];
+  const seen = new Set();
+  const noAnswersArr = [];
+
+  for (const iterator of qaAnswers) {
+    qaIds.push({
+      userId: iterator.userId?.S,
+      questionId: iterator.questionId?.S,
+    });
+  }
+  const filteredUndefined = qaIds.filter(
+    (data) => data.userId && data.questionId
+  );
+
+  // Step 1: Remove duplicates
+  filteredUndefined.forEach((item) => {
+    const key = `${item.userId}-${item.questionId}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueData.push(item);
+    }
+  });
+
+  // Step 2: Group by userId
+  const groupedData = uniqueData.reduce((acc, item) => {
+    if (!acc[item.userId]) {
+      acc[item.userId] = {
+        userId: item.userId,
+        questionIds: [],
+      };
+    }
+    acc[item.userId].questionIds.push(item.questionId);
+    return acc;
+  }, {});
+
+  // Convert groupedData to an array
+  const FINAL_GROUPED_RESULTS = Object.values(groupedData);
+  const FINAL_GROUPED_RESULTS_MAPPED = new Map(
+    FINAL_GROUPED_RESULTS.filter((data) => data.userId).map((user) => {
+      return [user.userId, user];
+    })
+  );
+
+  // Step 3: Filter users who have answers but no activityId
+  const response1 = __filter__FROM__QA(
+    // 1% - 99%
+    qa_filter_responseTwo,
+    FINAL_GROUPED_RESULTS_MAPPED,
+    usersMap_userId
+  );
+  fs.writeFileSync(
+    join(
+      __dirname,
+      "./logs/lms/problematic_students/no_checks/no_checks_has_answers_1_99.mjs"
+    ),
+    `${JSON.stringify(duplicatedRemoved(response1))}`
+  );
+
+  const response2 = __filter__FROM__QA(
+    // 100%
+    qa_filter_responseThree,
+    FINAL_GROUPED_RESULTS_MAPPED,
+    usersMap_userId
+  );
+  fs.writeFileSync(
+    join(
+      __dirname,
+      "./logs/lms/problematic_students/no_checks/no_checks_has_answers_100.mjs"
+    ),
+    `${JSON.stringify(response2)}`
+  );
+
+  // ADDITIONAL: filter out 100% progress with no answers.
+  for (const __i of qa_filter_responseThree) {
+    const questionUser = FINAL_GROUPED_RESULTS_MAPPED.get(__i.userId);
+    for (const __j of __i.QA_progress_only) {
+      if (!questionUser.questionIds.includes(__j)) {
+        noAnswersArr.push({
+          ...usersMap_userId.get(__i.userId),
+          activityId: __j,
+        });
+        continue;
+      }
+    }
+  }
+
+  fs.writeFileSync(
+    join(__dirname, "./logs/lms/problematic_students/no_qa_answer-100.mjs"),
+    `${JSON.stringify(duplicatedRemoved(noAnswersArr))}`
+  );
+
   return;
 };
 

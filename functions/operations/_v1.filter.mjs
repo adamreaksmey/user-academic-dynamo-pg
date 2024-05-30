@@ -78,7 +78,7 @@ const qaNotFound_100 = [
 
 export const __filterQAonly = async (
   PROBLEMATIC_USERS,
-  questionLearningPathId
+  questionLearningPathId,
 ) => {
   let response = [];
   let qaExistsOnly = [];
@@ -101,41 +101,41 @@ export const __filterQAonly = async (
   }
   qaExistsOnly = response.filter((data) => data.QA_progress_only.length > 0);
 
-  for (const i of qaExistsOnly) {
-    answerFoundCount++;
-    console.log("Processing", i.idCard, answerFoundCount);
-    for (const j of i.QA_progress_only) {
-      const response = await __fetchUserAnswerFromQA(j, i.userId);
-      if (response.length <= 0) {
-        noAnswerFoundCount++;
-        qaNotFound_100.push({
-          idCard: i.idCard,
-          userId: i.userId,
-          firstName: i.firstName,
-          lastName: i.lastName,
-          userNumberId: i.userNumberId,
-          activityId: j,
-          answer: response,
-        });
-        console.log(qaNotFound_100);
-        const removedDupes = duplicatedRemoved(qaNotFound_100);
-        fs.writeFileSync(
-          join(
-            __dirname,
-            "../../logs/lms/problematic_students/no_qa_answer-100.mjs"
-          ),
-          `${JSON.stringify(removedDupes)}`
-        );
-        console.log(noAnswerFoundCount);
-        continue;
-      }
-    }
-  }
+  // for (const i of qaExistsOnly) {
+  //   answerFoundCount++;
+  //   console.log("Processing", i.idCard, answerFoundCount);
+  //   for (const j of i.QA_progress_only) {
+  //     const response = await __fetchUserAnswerFromQA(j, i.userId);
+  //     if (response.length <= 0) {
+  //       noAnswerFoundCount++;
+  //       qaNotFound_100.push({
+  //         idCard: i.idCard,
+  //         userId: i.userId,
+  //         firstName: i.firstName,
+  //         lastName: i.lastName,
+  //         userNumberId: i.userNumberId,
+  //         activityId: j,
+  //         answer: response,
+  //       });
+  //       console.log(qaNotFound_100);
+  //       const removedDupes = duplicatedRemoved(qaNotFound_100);
+  //       fs.writeFileSync(
+  //         join(
+  //           __dirname,
+  //           "../../logs/lms/problematic_students/no_qa_answer-100.mjs"
+  //         ),
+  //         `${JSON.stringify(removedDupes)}`
+  //       );
+  //       console.log(noAnswerFoundCount);
+  //       continue;
+  //     }
+  //   }
+  // }
 
   return qaExistsOnly;
 };
 
-const duplicatedRemoved = (qaNotFound) => {
+export const duplicatedRemoved = (qaNotFound) => {
   const removedDupes = Object.values(
     qaNotFound.reduce((acc, obj) => {
       const idCard = obj.idCard;
@@ -147,4 +147,29 @@ const duplicatedRemoved = (qaNotFound) => {
   );
 
   return removedDupes;
+};
+
+export const __filter__FROM__QA = (
+  qa_filter_response,
+  FINAL_GROUPED_RESULTS_MAPPED,
+  usersMap_userId
+) => {
+  const uncheckArr = [];
+
+  for (const __i of qa_filter_response) {
+    // LMS
+    const questionUser = FINAL_GROUPED_RESULTS_MAPPED.get(__i.userId); // QA
+
+    for (const __j of questionUser.questionIds) {
+      if (!__i.QA_progress_only.includes(__j)) {
+        uncheckArr.push({
+          ...usersMap_userId.get(__i.userId),
+          activityId: __j,
+        });
+        continue;
+      }
+    }
+  }
+
+  return uncheckArr;
 };

@@ -16,3 +16,23 @@ IBF24112138
        FROM "lms_user_progress"
        WHERE "courseId" = 'edea75b8-93f2-494a-8e13-e51471fcef20')
 TO '/Users/michaellogy/Desktop/sala-projects/dynamo-2-sql-user-academic/input_sql/lms/lms_user_progress_29_05_2024.sql'
+
+-----
+    for (const __j of __i.QA_progress_only) {
+      if (!questionUser.questionIds.includes(__j)) {
+        uncheckArr.push({
+          ...usersMap_userId.get(__i.userId),
+          activityId: __j,
+        });
+        fs.writeFileSync(
+          join(
+            __dirname,
+            "./logs/lms/problematic_students/no_checks/no_checks_has_answers.mjs"
+          ),
+          `${JSON.stringify(uncheckArr)}`
+        );
+        continue;
+      }
+    }
+-----
+
