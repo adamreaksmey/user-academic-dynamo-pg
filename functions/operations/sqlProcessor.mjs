@@ -45,13 +45,16 @@ export const processSqlBackup = async (tableName = null, filePath) => {
     }
   } else if (tableName == "users") {
     for (const data of objectsContent) {
-      formattedContent.push({
-        tableName,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        idCard: data.idCard,
-        userNumberId: data.userNumberId,
-      });
+      if (objHasKey(data, "userId") && data.userId) {
+        formattedContent.push({
+          tableName,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          idCard: data.idCard,
+          userNumberId: data.userNumberId,
+          userId: data.userId,
+        });
+      }
     }
   } else {
     formattedContent = objectsContent;
