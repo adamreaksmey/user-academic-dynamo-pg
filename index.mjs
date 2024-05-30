@@ -18,7 +18,11 @@ import guardians from "./logs/academic/guardians.mjs";
 import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 import { promises as pfs } from "fs";
 import guardiansToBeReplaced from "./map/guardians.mjs";
-import { __MASTER_MAPPER } from "./functions/operations/_v1.filter.mjs";
+import {
+  __MASTER_MAPPER,
+  __fetchUserAnswerFromQA,
+  __filterQAonly,
+} from "./functions/operations/_v1.filter.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,7 +54,11 @@ const main = async (__filename, __dirname) => {
   );
 
   const lessonsCount = await calculateLessonCountBasedOnQA(learningPath); // should be 72
-  const questionLearningPathId = lessonsCount.ids
+  const questionLearningPathId = lessonsCount.ids;
+  fs.writeFileSync(
+    join(__dirname, "./logs/lms/logs/qa_ids.mjs"),
+    `${JSON.stringify(questionLearningPathId)}`
+  );
   /**
    *
    */
@@ -139,7 +147,7 @@ const main = async (__filename, __dirname) => {
     LMS_USER_PROGRESS,
     userNumberIdSet_0,
     usersMap
-  );
+  ).filter((d) => d.progressArray.length > 0);
   fs.writeFileSync(
     join(__dirname, "./logs/lms/problematic_students/0%.mjs"),
     `${JSON.stringify(PROBLEMATIC_0)}`
@@ -177,10 +185,27 @@ const main = async (__filename, __dirname) => {
 
   // -------- OPERATION 3 ( FROM LMS SIDE, checks for unanswered questions but has activityId ) ----------
   console.log("-------- OPERATION 3 ----------");
-  // for (const iterator of PROBLEMATIC_1_99) {
-  //   console.log(iterator);
-  // }
 
+  // -------- 0% Progress ---------- ( No QA ID detected, yayyy! )
+  // const qa_filter_responseOne = await __filterQAonly(
+  //   PROBLEMATIC_0,
+  //   questionLearningPathId
+  // );
+  // console.log("0% - ", qa_filter_responseOne.length);
+
+  // -------- 1% - 99% Progress -------------
+  // const qa_filter_responseTwo = await __filterQAonly(
+  //   PROBLEMATIC_1_99,
+  //   questionLearningPathId
+  // );
+  // console.log("1% - 99%", qa_filter_responseTwo.length);
+
+  // -------- 100% Progress -------------
+  const qa_filter_responseThree = await __filterQAonly(
+    PROBLEMATIC_100,
+    questionLearningPathId
+  );
+  console.log("100% -", qa_filter_responseThree);
   return;
 };
 
