@@ -9,6 +9,9 @@ enjoy :)
 // Regex to remove array objects:
 \[\s*(\{[^}]*\}(?:,\s*\{[^}]*\})*)\s*\]
 
+// LAST STUDENT IN 100
+IBF24112138
+
 \copy (SELECT 'INSERT INTO "lms_user_progress" ("activityId", "userNumberId") VALUES (''' || "activityId" || ''', ''' || "userNumberId" || ''');'
        FROM "lms_user_progress"
        WHERE "courseId" = 'edea75b8-93f2-494a-8e13-e51471fcef20')

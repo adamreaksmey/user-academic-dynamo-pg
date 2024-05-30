@@ -64,7 +64,17 @@ export const __fetchUserAnswerFromQA = async (activityId, userId) => {
 };
 
 const qaNotFound_1_99 = [];
-const qaNotFound_100 = [];
+const qaNotFound_100 = [
+  {
+    idCard: "IBF24114752",
+    userId: "11c24a82-ab60-44d6-b4dd-0f8c9cf2993c",
+    firstName: "Koeun",
+    lastName: "Kun",
+    userNumberId: "28980",
+    activityId: "c196ed98-2046-4393-add4-ec1c57b1da6d",
+    answer: [],
+  },
+];
 
 export const __filterQAonly = async (
   PROBLEMATIC_USERS,
@@ -74,7 +84,6 @@ export const __filterQAonly = async (
   let qaExistsOnly = [];
   let noAnswerFoundCount = 0;
   let answerFoundCount = 0;
-  let forEachAnswerCount = 0;
 
   for (const iterator of PROBLEMATIC_USERS) {
     const FILTERED_TO_QA_ONLY = iterator.progressArray.filter((id) =>

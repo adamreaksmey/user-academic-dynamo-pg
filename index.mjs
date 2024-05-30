@@ -206,6 +206,8 @@ const main = async (__filename, __dirname) => {
     questionLearningPathId
   );
   console.log("100% -", qa_filter_responseThree);
+
+  // -------- OPERATION 4 ( FROM QA-service SIDE, checks for answered questions but has no activityId ) ----------
   return;
 };
 
