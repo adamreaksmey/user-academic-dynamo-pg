@@ -46,13 +46,14 @@ const main = async (__filename, __dirname) => {
   for (let i = 0; i < LMS_USERS.length; i += 3) {
     const batch = LMS_USERS.slice(i, i + 3);
 
-    const promises = batch.map(user => {
+    const promises = batch.map((user) => {
       return createGuardianOnKeyCloak({
+        id: user.guardianId,
         username: user.userName,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-      }).then(response => {
+      }).then((response) => {
         console.log("Response:", response);
       });
     });
@@ -60,7 +61,7 @@ const main = async (__filename, __dirname) => {
     await Promise.all(promises);
 
     if (i + 3 < LMS_USERS.length) {
-      await delay(5000);  // Wait for 5 seconds with countdown
+      await delay(5000); // Wait for 5 seconds with countdown
     }
   }
 
@@ -68,4 +69,3 @@ const main = async (__filename, __dirname) => {
 };
 
 main(__filename, __dirname).catch(console.error);
-
