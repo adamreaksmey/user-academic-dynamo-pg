@@ -14,13 +14,14 @@ const IBF_SCHOOL = "61f17951-d509-4b60-967b-a84442f949b6";
 export const createGuardianOnKeyCloak = async (user) => {
   const params = {
     ...user,
+    customId: user.id,
     password: "123456789",
     app: "lms",
-    role: "Guardian",
+    // role: "Guardian",
     schoolId: IBF_SCHOOL,
   };
 
-  console.log(params)
+  console.log(params);
 
   const response = await fetch(userServiceUrl, {
     ...options,
@@ -28,7 +29,7 @@ export const createGuardianOnKeyCloak = async (user) => {
   });
 
   if (!response.ok) {
-    console.log(response)
+    console.log(response);
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 

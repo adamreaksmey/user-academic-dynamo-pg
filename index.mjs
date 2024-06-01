@@ -16,6 +16,7 @@ import { promises as pfs } from "fs";
 import mergedUsers from "./logs/lms/merged.mjs";
 import { ObjectHasKey } from "./functions/operations/data.mjs";
 import { createGuardianOnKeyCloak } from "./functions/keycloak/keycloak-lms.mjs";
+import { g_Keycloak } from "./logs/keycloak/guardians.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,20 +39,17 @@ const delay = async (ms) => {
 };
 
 const main = async (__filename, __dirname) => {
-  const LMS_USERS = await processSqlBackup(
-    "GUARDIAN",
-    "./sources/KEYCLOAK-GUARDIAN.sql"
-  );
+  const LMS_USERS = g_Keycloak;
 
   for (let i = 0; i < LMS_USERS.length; i += 3) {
     const batch = LMS_USERS.slice(i, i + 3);
 
     const promises = batch.map((user) => {
       return createGuardianOnKeyCloak({
-        id: user.guardianId,
-        username: user.userName,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        id: user.id,
+        username: user.username,
+        firstName: user.first_name,
+        lastName: user.last_name,
         email: user.email,
       }).then((response) => {
         console.log("Response:", response);
