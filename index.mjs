@@ -43,12 +43,11 @@ const delay = async (ms) => {
 };
 
 const main = async (__filename, __dirname) => {
-  for (const iterator of g_Keycloak) {
-   const response = await assignRoleToClients({
-      id: iterator.id,
-    });
-    console.log(response)
-  }
+  const users = await processSqlBackup(
+    "none",
+    "./input_sql/lms/lms_user_04_06_2024.sql"
+  );
+
 };
 
 main(__filename, __dirname).catch(console.error);
