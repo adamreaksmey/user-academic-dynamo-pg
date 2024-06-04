@@ -16,6 +16,7 @@ const options = {
   },
 };
 const IBF_SCHOOL = "61f17951-d509-4b60-967b-a84442f949b6";
+const IBF_CAMPUSID = ""
 
 export const createGuardianOnKeyCloak = async (user) => {
   const params = {
@@ -90,3 +91,7 @@ export const assignRoleToClients = async (data) => {
 
   return res;
 };
+
+export const enrollStudentAcademic = async (data) => {
+
+}

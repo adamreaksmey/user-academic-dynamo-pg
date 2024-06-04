@@ -42,12 +42,27 @@ const delay = async (ms) => {
   }
 };
 
+const newMapper = (data, key) => {
+  return new Map(
+    data.map((user) => {
+      return [user[key], user];
+    })
+  );
+};
+
 const main = async (__filename, __dirname) => {
   const users = await processSqlBackup(
     "none",
     "./input_sql/lms/lms_user_04_06_2024.sql"
   );
+  // const course_users = await processSqlBackup(
+  //   "none",
+  //   "./input_sql/lms/lms_courses_users_04_06_2024.sql"
+  // );
 
+  const usersMap = newMapper(users, "uniqueKey");
+
+  console.log(usersMap);
 };
 
 main(__filename, __dirname).catch(console.error);

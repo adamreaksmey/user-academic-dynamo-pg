@@ -104,10 +104,10 @@ export const safeFetch = async (url, options, retries = 5) => {
       return null; // Return null or some other indicator of a 'Not Found' response
     }
     if (response.status === 401) {
-      console.log("Unauthorized")
+      console.log("Unauthorized");
     }
     if (!response.ok) {
-      console.log(response)
+      console.log(response);
       throw new Error(`HTTP error! status: ${response?.status}`);
     }
     return await response.json();
@@ -123,4 +123,10 @@ export const safeFetch = async (url, options, retries = 5) => {
   }
 };
 
-
+export const newMapper = (data, key) => {
+  return new Map(
+    data.map((user) => {
+      return [user[key], user];
+    })
+  );
+};
