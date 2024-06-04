@@ -14,7 +14,7 @@ import guardians from "./logs/academic/guardians.mjs";
 import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 import { promises as pfs } from "fs";
 import mergedUsers from "./logs/lms/merged.mjs";
-import { ObjectHasKey } from "./functions/operations/data.mjs";
+import { ObjectHasKey, newMapper } from "./functions/operations/data.mjs";
 import {
   createGuardianOnKeyCloak,
   updateUserNameAcademic,
@@ -42,27 +42,22 @@ const delay = async (ms) => {
   }
 };
 
-const newMapper = (data, key) => {
-  return new Map(
-    data.map((user) => {
-      return [user[key], user];
-    })
-  );
-};
-
 const main = async (__filename, __dirname) => {
   const users = await processSqlBackup(
     "none",
     "./input_sql/lms/lms_user_04_06_2024.sql"
   );
-  // const course_users = await processSqlBackup(
-  //   "none",
-  //   "./input_sql/lms/lms_courses_users_04_06_2024.sql"
-  // );
+  const course_users = await processSqlBackup(
+    "none",
+    "./input_sql/lms/lms_courses_users_04_06_2024.sql"
+  );
 
   const usersMap = newMapper(users, "uniqueKey");
+  const course_users_map = newMapper(course_users, "userNumberId");
+  const getUserNumberId_by_idCard = usersMap.get("IBF23318100").userNumberId;
+  const getCourseInfo_by_userNumberId = course_users_map.get(getUserNumberId_by_idCard)
 
-  console.log(usersMap);
+  console.log(getCourseInfo_by_userNumberId);
 };
 
 main(__filename, __dirname).catch(console.error);
