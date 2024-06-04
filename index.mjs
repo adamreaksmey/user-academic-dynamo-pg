@@ -15,7 +15,11 @@ import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 import { promises as pfs } from "fs";
 import mergedUsers from "./logs/lms/merged.mjs";
 import { ObjectHasKey } from "./functions/operations/data.mjs";
-import { createGuardianOnKeyCloak } from "./functions/keycloak/keycloak-lms.mjs";
+import {
+  createGuardianOnKeyCloak,
+  updateUserNameAcademic,
+  assignRoleToClients,
+} from "./functions/keycloak/keycloak-lms.mjs";
 import { g_Keycloak } from "./logs/keycloak/guardians.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,31 +43,12 @@ const delay = async (ms) => {
 };
 
 const main = async (__filename, __dirname) => {
-  const LMS_USERS = g_Keycloak;
-
-  for (let i = 0; i < LMS_USERS.length; i += 3) {
-    const batch = LMS_USERS.slice(i, i + 3);
-
-    const promises = batch.map((user) => {
-      return createGuardianOnKeyCloak({
-        id: user.id,
-        username: user.username,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        email: user.email,
-      }).then((response) => {
-        console.log("Response:", response);
-      });
+  for (const iterator of g_Keycloak) {
+   const response = await assignRoleToClients({
+      id: iterator.id,
     });
-
-    await Promise.all(promises);
-
-    if (i + 3 < LMS_USERS.length) {
-      await delay(5000); // Wait for 5 seconds with countdown
-    }
+    console.log(response)
   }
-
-  return LMS_USERS;
 };
 
 main(__filename, __dirname).catch(console.error);
