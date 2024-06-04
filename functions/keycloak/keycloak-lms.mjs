@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+// import fetch from "node-fetch";
 import { safeFetch } from "./functions.mjs";
 
 const userServiceUrl = `https://sms-api.ibfkh.org/user_service/users/direct`;

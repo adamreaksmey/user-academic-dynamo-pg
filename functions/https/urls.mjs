@@ -7,3 +7,7 @@ export const academicServiceUrl = (guardianId, orgId) => {
 export const userServicePassword = `https://sms-api.ibfkh.org/user_service/direct/users/user_password`;
 
 export const userServiceRoles = `https://sms-api.ibfkh.org/user_service/users/assign_role`;
+
+export const enrollStudent = (orgId, campusId) => {
+  return `https://sms-api.ibfkh.org/academic_service/schools/${orgId}/campus/${campusId}/students`;
+};

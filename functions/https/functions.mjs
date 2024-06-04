@@ -1,9 +1,12 @@
-import fetch from "node-fetch";
+// import fetch from "node-fetch";
+import axios from "axios";
+
 import {
   userServiceUrl,
   academicServiceUrl,
   userServicePassword,
   userServiceRoles,
+  enrollStudent,
 } from "./urls.mjs";
 
 // --------------------------------------------------------------------
@@ -15,8 +18,32 @@ const options = {
     "Content-Type": "application/json",
   },
 };
+const headers = {
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
+};
+
 const IBF_SCHOOL = "61f17951-d509-4b60-967b-a84442f949b6";
-const IBF_CAMPUSID = ""
+const IBF_CAMPUSID = "76044dab-2031-4b66-bf0c-be3c273f0687";
+
+export const enrollStudentAcademic = async (data) => {
+  console.log("STUDENT =>", data);
+
+  try {
+    const response = await axios.post(
+      enrollStudent(IBF_SCHOOL, IBF_CAMPUSID),
+      data,
+      headers
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw new Error(`HTTP error! status: ${error.response.status}`);
+  }
+};
 
 export const createGuardianOnKeyCloak = async (user) => {
   const params = {
@@ -91,7 +118,3 @@ export const assignRoleToClients = async (data) => {
 
   return res;
 };
-
-export const enrollStudentAcademic = async (data) => {
-
-}

@@ -20,7 +20,9 @@ import {
   updateUserNameAcademic,
   assignRoleToClients,
 } from "./functions/keycloak/keycloak-lms.mjs";
+import { enrollStudentAcademic } from "./functions/https/functions.mjs";
 import { g_Keycloak } from "./logs/keycloak/guardians.mjs";
+import { toBeEnrolledStudents } from "./logs/academic/tobe-enrolled-students.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -51,13 +53,63 @@ const main = async (__filename, __dirname) => {
     "none",
     "./input_sql/lms/lms_courses_users_04_06_2024.sql"
   );
+  const subjects = await processSqlBackup(
+    "none",
+    "./input_sql/academic/academic_subject_04_06_2024.sql"
+  );
 
+  // ------ Mappers -------
   const usersMap = newMapper(users, "uniqueKey");
   const course_users_map = newMapper(course_users, "userNumberId");
-  const getUserNumberId_by_idCard = usersMap.get("IBF23318100").userNumberId;
-  const getCourseInfo_by_userNumberId = course_users_map.get(getUserNumberId_by_idCard)
+  const subjects_map = newMapper(subjects, "lmsCourseId");
+  // ----------------------
+  const dataKeys = [
+    "phone",
+    "email",
+    "userName",
+    "firstName",
+    "lastName",
+    "firstNameNative",
+    "lastNameNative",
+    "gender",
+    "dob",
+    "guardianId",
+    "guardianName",
+    "uniqueKey",
+    "profile",
+    "groupStructureId",
+    "structureRecordId",
+    "idCard",
+  ];
+  const finalData = [];
 
-  console.log(getCourseInfo_by_userNumberId);
+  for (const iterator of toBeEnrolledStudents) {
+    const getUserNumberId_by_idCard = usersMap.get(iterator).userNumberId;
+    const getCourseInfo_by_userNumberId = course_users_map.get(
+      getUserNumberId_by_idCard
+    );
+    const courseId = getCourseInfo_by_userNumberId.courseId;
+    const getStructureInfo = subjects_map.get(courseId);
+
+    const userData = usersMap.get(iterator);
+    const dataObject = {};
+
+    for (const key of dataKeys) {
+      dataObject[key] = userData[key] == "" ? null : userData[key];
+    }
+
+    dataObject.groupStructureId = getStructureInfo.groupStructureId;
+    dataObject.structureRecordId = getStructureInfo.structureRecordId;
+    dataObject.profile = JSON.parse(userData.profile);
+
+    finalData.push(dataObject);
+  }
+
+  // ENROLLMENT HAPPENS HERE
+  for (const iterator of finalData) {
+    const response = await enrollStudentAcademic(iterator);
+    console.log(response);
+  }
 };
 
 main(__filename, __dirname).catch(console.error);
