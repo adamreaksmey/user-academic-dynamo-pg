@@ -7,6 +7,8 @@ import {
   userServicePassword,
   userServiceRoles,
   enrollStudent,
+  academicAssignGuardian,
+  academicUnassignGuardian,
 } from "./urls.mjs";
 
 // --------------------------------------------------------------------
@@ -28,9 +30,40 @@ const headers = {
 const IBF_SCHOOL = "61f17951-d509-4b60-967b-a84442f949b6";
 const IBF_CAMPUSID = "76044dab-2031-4b66-bf0c-be3c273f0687";
 
-export const enrollStudentAcademic = async (data) => {
-  console.log("STUDENT =>", data);
+export const unassignStudentFromGuardian = async (data) => {
+  const { oldGuardianId, uniqueKey } = data;
+  try {
+    const response = await axios({
+      method: "DELETE",
+      url: academicUnassignGuardian(IBF_SCHOOL, oldGuardianId, uniqueKey),
+    });
 
+    console.log("response from unassign guardian", response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw new Error(`HTTP error! status: ${error.response.status}`);
+  }
+};
+
+export const assignGuardian = async (data) => {
+  const { guardianId, uniqueKey } = data;
+  console.log(data);
+  try {
+    const response = await axios({
+      method: "PATCH",
+      url: academicAssignGuardian(IBF_SCHOOL, guardianId, uniqueKey),
+    });
+
+    console.log("response from guardian", response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw new Error(`HTTP error! status: ${error.response.status}`);
+  }
+};
+
+export const enrollStudentAcademic = async (data) => {
   try {
     const response = await axios.post(
       enrollStudent(IBF_SCHOOL, IBF_CAMPUSID),
@@ -38,6 +71,7 @@ export const enrollStudentAcademic = async (data) => {
       headers
     );
 
+    console.log("Enrollment successful!");
     return response.data;
   } catch (error) {
     console.log(error);
