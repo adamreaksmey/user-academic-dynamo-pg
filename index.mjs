@@ -300,6 +300,7 @@ const main = async (__filename, __dirname) => {
   );
 
   // ADDITIONAL: filter out 100% progress with no answers.
+  // IMPORTANT LOOP, this does a reverse loop filtering from QA sides instead.
   for (const __i of qa_filter_responseThree) {
     const questionUser = FINAL_GROUPED_RESULTS_MAPPED.get(__i.userId);
     for (const __j of __i.QA_progress_only) {

@@ -145,3 +145,11 @@ export const searchDelete = (tree, idToDelete) => {
   }
   return cleanTree;
 };
+
+export const newMapper = (data, key) => {
+  return new Map(
+    data.map((user) => {
+      return [user[key], user];
+    })
+  );
+};
