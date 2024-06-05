@@ -45,8 +45,10 @@ export const __MASTER_MAPPER = (
 export const __fetchUserAnswerFromQA = async (activityId, userId) => {
   const orgId = "61f17951-d509-4b60-967b-a84442f949b6";
   const subjects = "27c50847-561a-43af-97de-2d85d3cb281b";
+  const qaServiceProd = 'https://api.ibfkh.org/question_service/v1';
+  const qaServiceStaging = 'https://api.staging.ibfkh.org/question_service/v1';
 
-  const url = `https://api.ibfkh.org/question_service/v1/organizations/${orgId}/subjects/${subjects}/questions/${activityId}/userAnswers?userId=${userId}`;
+  const url = `${qaServiceProd}/organizations/${orgId}/subjects/${subjects}/questions/${activityId}/userAnswers?userId=${userId}`;
   try {
     const _response = await axios({
       method: "GET",
