@@ -207,6 +207,17 @@ const main = async (__filename, __dirname) => {
   // console.log("0% - ", qa_filter_responseOne);
 
   // -------- 1% - 99% Progress -------------
+  /**
+   * Response
+   * [{
+        idCard: iterator.idCard,
+        userId: iterator.userId,
+        firstName: iterator.firstName,
+        lastName: iterator.lastName,
+        userNumberId: iterator.userNumberId,
+        QA_progress_only: FILTERED_TO_QA_ONLY | [],
+    }]
+   */
   const qa_filter_responseTwo = await __filterQAonly(
     PROBLEMATIC_1_99,
     questionLearningPathId
@@ -318,6 +329,7 @@ const main = async (__filename, __dirname) => {
     join(__dirname, "./logs/lms/problematic_students/no_qa_answer-100.mjs"),
     `${JSON.stringify(duplicatedRemoved(noAnswersArr))}`
   );
+  // End of important loop.
 
   return;
 };

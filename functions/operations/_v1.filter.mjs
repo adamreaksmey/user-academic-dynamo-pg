@@ -1,5 +1,5 @@
 // import "../../logs/lms/problematic_students/no_qa_answer.mjs"
-import fetch from "node-fetch";
+import axios from "axios";
 import fs from "fs";
 import { fileURLToPath, pathToFileURL } from "url";
 import { dirname, join } from "path";
@@ -48,15 +48,12 @@ export const __fetchUserAnswerFromQA = async (activityId, userId) => {
 
   const url = `https://api.ibfkh.org/question_service/v1/organizations/${orgId}/subjects/${subjects}/questions/${activityId}/userAnswers?userId=${userId}`;
   try {
-    const response = await fetch(url, {
+    const _response = await axios({
       method: "GET",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      url,
     });
 
-    const data = await response.json();
-
-    // console.log(data);
-    return data;
+    return _response;
   } catch (error) {
     console.error("Error refreshing token:", error);
     return null;
@@ -78,7 +75,7 @@ const qaNotFound_100 = [
 
 export const __filterQAonly = async (
   PROBLEMATIC_USERS,
-  questionLearningPathId,
+  questionLearningPathId
 ) => {
   let response = [];
   let qaExistsOnly = [];
@@ -172,4 +169,27 @@ export const __filter__FROM__QA = (
   }
 
   return uncheckArr;
+};
+
+export const reverseFilterFromQa = (
+  qaFilterResponse,
+  FINAL_GROUPED_RESULTS_MAPPED,
+  usersMap_userId
+) => {
+  const noAnswersArr = [];
+  // ----------------------
+  for (const __i of qaFilterResponse) {
+    const questionUser = FINAL_GROUPED_RESULTS_MAPPED.get(__i.userId);
+    for (const __j of __i.QA_progress_only) {
+      if (!questionUser.questionIds.includes(__j)) {
+        noAnswersArr.push({
+          ...usersMap_userId.get(__i.userId),
+          activityId: __j,
+        });
+        continue;
+      }
+    }
+  }
+
+  return noAnswersArr;
 };
