@@ -50,10 +50,10 @@ const delay = async (ms) => {
 };
 
 const main = async (__filename, __dirname) => {
-  const users = await processSqlBackup(
-    "none",
-    "./input_sql/lms/lms_user_04_06_2024.sql"
-  );
+  // const users = await processSqlBackup(
+  //   "none",
+  //   "./input_sql/lms/lms_user_04_06_2024.sql"
+  // );
   // -----
   const course_users = await processSqlBackup(
     "none",
@@ -65,7 +65,7 @@ const main = async (__filename, __dirname) => {
   );
 
   // ------ Mappers -------
-  const usersMap = newMapper(users, "uniqueKey");
+  // const usersMap = newMapper(users, "uniqueKey");
   const course_users_map = newMapper(course_users, "userNumberId");
   const subjects_map = newMapper(subjects, "lmsCourseId");
   // ----------------------
