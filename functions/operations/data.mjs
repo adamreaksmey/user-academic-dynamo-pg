@@ -124,9 +124,13 @@ export const safeFetch = async (url, options, retries = 5) => {
 };
 
 export const newMapper = (data, key) => {
-  return new Map(
-    data.map((user) => {
-      return [user[key], user];
-    })
-  );
+  return data.reduce((map, user) => {
+    const mapKey = user[key];
+    if (map.has(mapKey)) {
+      map.get(mapKey).push(user);
+    } else {
+      map.set(mapKey, [user]);
+    }
+    return map;
+  }, new Map());
 };

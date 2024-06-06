@@ -4,7 +4,7 @@ import axios from "axios";
 import {
   userServiceUrl,
   academicServiceUrl,
-  userServicePassword,
+  lmsGetUserInfo,
   userServiceRoles,
   enrollStudent,
   academicAssignGuardian,
@@ -30,6 +30,21 @@ const headers = {
 const IBF_SCHOOL = "61f17951-d509-4b60-967b-a84442f949b6";
 const IBF_CAMPUSID = "76044dab-2031-4b66-bf0c-be3c273f0687";
 
+export const getUserInfo = async (uniqueKey) => {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: lmsGetUserInfo(IBF_SCHOOL, uniqueKey),
+    });
+
+    // console.log("response from get user info", response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw new Error(`HTTP error! status: ${error.response.status}`);
+  }
+};
+
 export const unassignStudentFromGuardian = async (data) => {
   const { oldGuardianId, uniqueKey } = data;
   try {
@@ -48,7 +63,7 @@ export const unassignStudentFromGuardian = async (data) => {
 
 export const assignGuardian = async (data) => {
   const { guardianId, uniqueKey } = data;
-  console.log(data);
+  console.log("From assigning guardian", data);
   try {
     const response = await axios({
       method: "PATCH",

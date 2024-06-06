@@ -19,3 +19,7 @@ export const academicAssignGuardian = (orgId, guardianId, uniqueKey) => {
 export const academicUnassignGuardian = (orgId, guardianId, uniqueKey) => {
   return `https://sms-api.ibfkh.org/academic_service/schools/${orgId}/guardians/${guardianId}/students/${uniqueKey}`;
 };
+
+export const lmsGetUserInfo = (orgId, uniqueKey) => {
+  return `https://sms-api.ibfkh.org/lms_service/organizations/${orgId}/users/${uniqueKey}`;
+};

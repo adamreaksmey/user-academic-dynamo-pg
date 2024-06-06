@@ -24,6 +24,7 @@ import {
   enrollStudentAcademic,
   assignGuardian,
   unassignStudentFromGuardian,
+  getUserInfo,
 } from "./functions/https/functions.mjs";
 import { g_Keycloak } from "./logs/keycloak/guardians.mjs";
 import { toBeEnrolledStudents } from "./logs/academic/tobe-enrolled-students.mjs";
@@ -89,42 +90,51 @@ const main = async (__filename, __dirname) => {
   let finalData = [];
 
   for (const iterator of toBeEnrolledStudents) {
-    // console.log(usersMap.get(iterator))
-    const getUserNumberId_by_idCard = usersMap.get(iterator)?.userNumberId;
-    if (!getUserNumberId_by_idCard) {
-      console.log("UserNumberId not found", iterator);
+    // ---- Get user info ----
+    const getUserInfoFromLms = await getUserInfo(iterator);
+    const indexedResponse = getUserInfoFromLms[0];
+    const _response1 = indexedResponse.userNumberId.toString();
+    // -----------------------
+    if (!_response1) {
+      console.log("UserNumberId found", iterator);
     }
-    const getCourseInfo_by_userNumberId = course_users_map.get(
-      getUserNumberId_by_idCard
-    );
-    const courseId = getCourseInfo_by_userNumberId?.courseId || null;
-    if (!courseId) {
-      console.log("Course ID not found", iterator);
-    }
-
-    const getStructureInfo = subjects_map.get(courseId);
-    const userData = usersMap.get(iterator);
-    const dataObject = {};
-
-    for (const key of dataKeys) {
-      dataObject[key] = userData[key] == "" ? null : userData[key];
+    // ---- Get course & structure record for users info ----
+    let structureRecordInfo = [];
+    const getCourseInfo_by_userNumberId = course_users_map.get(_response1);
+    if (!getCourseInfo_by_userNumberId) {
+      console.log("Course user not found", iterator);
     }
 
-    dataObject.groupStructureId = getStructureInfo?.groupStructureId || null;
-    dataObject.structureRecordId = getStructureInfo?.structureRecordId || null;
-    dataObject.profile = JSON.parse(userData.profile);
+    for (const course of getCourseInfo_by_userNumberId) {
+      if (!course.courseId) {
+        console.log("Course ID not found", iterator);
+      }
+      structureRecordInfo.push(subjects_map.get(course.courseId));
+    }
+    structureRecordInfo = structureRecordInfo.flat();
+    // -----------------------
 
-    finalData.push(dataObject);
+    // ---- Users insertion prepare for final data to sync
+    for (const course of structureRecordInfo) {
+      const dataObject = {};
+      for (const key of dataKeys) {
+        dataObject[key] =
+          indexedResponse[key] == "" ? null : indexedResponse[key];
+      }
+      dataObject.groupStructureId = course.groupStructureId;
+      dataObject.structureRecordId = course.structureRecordId;
+      dataObject.profile = indexedResponse.profile;
+      finalData.push(dataObject);
+    }
     finalData = finalData.filter(
       (data) => data.guardianId && data.guardianName
     );
+    // -----------------------
   }
-  console.log(finalData);
-  return;
   // ENROLLMENT HAPPENS HERE
   for (const iterator of finalData) {
     // if (problemsStudents.includes(iterator.uniqueKey)) {
-    iterator["oldGuardianId"] = "434afc8a-80af-4083-bf6a-88cf9c8e40fb";
+    iterator["oldGuardianId"] = "473edcc2-99f6-438a-be70-0f80b488caa2";
     // }
 
     if (ObjectHasKey(iterator, "oldGuardianId")) {
