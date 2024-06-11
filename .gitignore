@@ -19,5 +19,6 @@ venv
 node_modules
 
 input_sql
+input_mjs
 
 output

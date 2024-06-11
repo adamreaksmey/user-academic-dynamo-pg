@@ -99,7 +99,7 @@ const main = async (__filename, __dirname) => {
     `${JSON.stringify(filterOne)}`
   );
   console.log("0% - ", filterOne.length);
-  // Loop 1
+  // Loop 1 || for loop to push userNumberId in for every 0% user
   for (const iterator of filterOne) {
     LMS_COURSE_USERS_ID_0.push(iterator.userNumberId);
   }
@@ -115,7 +115,7 @@ const main = async (__filename, __dirname) => {
     `${JSON.stringify(filterTwo)}`
   );
   console.log("1% - 99%", filterTwo.length);
-  // Loop 2
+  // Loop 2 || for loop to push userNumberId in for every 1% - 99%
   for (const iterator of filterTwo) {
     LMS_COURSE_USERS_ID_1_99.push(iterator.userNumberId);
   }
@@ -131,7 +131,7 @@ const main = async (__filename, __dirname) => {
     `${JSON.stringify(filterThree)}`
   );
   console.log("100% - ", filterThree.length);
-  // Loop 3
+  // Loop 3 || 
   for (const iterator of filterThree) {
     LMS_COURSE_USERS_ID_100.push(iterator.userNumberId);
   }

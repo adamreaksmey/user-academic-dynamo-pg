@@ -42,6 +42,10 @@ export const __MASTER_MAPPER = (
   return PROBLEMATIC_STUDENTS;
 };
 
+export const fetchDataFromQA = async (activityId) => {
+  
+}
+
 export const __fetchUserAnswerFromQA = async (activityId, userId) => {
   const orgId = "61f17951-d509-4b60-967b-a84442f949b6";
   const subjects = "27c50847-561a-43af-97de-2d85d3cb281b";
