@@ -15,6 +15,7 @@ import {
   getUserProgressRecords,
   getSingleUserProgress,
   createUserProgress,
+  deleteSingleUserProgress,
 } from "./functions/http/lms/functions.mjs";
 
 import {
@@ -36,6 +37,7 @@ import {
 import { usersWithNoChecks } from "./logs/lms/problematic_students/no_checks/no_checks_has_answers_1_99.mjs";
 import { progressToBeCreated } from "./logs/lms/to-be-created/data.mjs";
 import { noQaAnswers } from "./logs/lms/problematic_students/no_answers/no_qa_answer-1-99.mjs";
+import { toBeDeleted } from "./logs/lms/to-be-deleted/data.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -134,50 +136,66 @@ const main = async (__filename, __dirname) => {
   /**
    * Those with progress but without answers will get their progress deleted:
    */
-  const qaIncludes = [];
-  const finalQaIncludes = [];
+  // const qaIncludes = [];
+  // const finalQaIncludes = [];
 
-  for (const __I of noQaAnswers) {
-    const qaIdsToBeDeleted = [];
-    const idCard = usersMapped.get(__I.userNumberId).idCard;
-    const userProgress = await getUserProgressRecords({
-      idCard,
-    });
-    for (const __J of userProgress) {
-      if (questionLearningPathId.includes(__J.activityId)) {
-        qaIdsToBeDeleted.push(__J.activityId);
-      }
-    }
-    qaIncludes.push({
-      idCard,
-      userId: __I.userId,
-      qaIdsToBeDeleted,
-    });
-  }
+  // for (const __I of noQaAnswers) {
+  //   const qaIdsToBeDeleted = [];
+  //   const idCard = usersMapped.get(__I.userNumberId).idCard;
+  //   const userProgress = await getUserProgressRecords({
+  //     idCard,
+  //   });
+  //   for (const __J of userProgress) {
+  //     if (questionLearningPathId.includes(__J.activityId)) {
+  //       qaIdsToBeDeleted.push(__J.activityId);
+  //     }
+  //   }
+  //   qaIncludes.push({
+  //     idCard,
+  //     userId: __I.userId,
+  //     qaIdsToBeDeleted,
+  //   });
+  // }
 
-  for (const __I of qaIncludes) {
-    const qaIdsToBeDeleted = [];
-    const idCard = __I.idCard;
+  // for (const __I of qaIncludes) {
+  //   const qaIdsToBeDeleted = [];
+  //   const idCard = __I.idCard;
+  //   for (const __J of __I.qaIdsToBeDeleted) {
+  //     const response = await getSingleUserAnswerFromQa({
+  //       activityId: __J,
+  //       userId: __I.userId,
+  //     });
+  //     if (response.length <= 0) {
+  //       console.log("Found progress with no answers", __J);
+  //       qaIdsToBeDeleted.push(__J);
+  //     }
+  //   }
+  //   finalQaIncludes.push({
+  //     idCard,
+  //     userId: __I.userId,
+  //     qaIdsToBeDeleted,
+  //   });
+  // }
+
+  // fs.writeFileSync(
+  //   join(__dirname, "./logs/lms/to-be-deleted/data.mjs"),
+  //   `${JSON.stringify(finalQaIncludes)}`
+  // );
+
+  // ----------- OPERATION 4 ------------
+  for (const __I of toBeDeleted) {
     for (const __J of __I.qaIdsToBeDeleted) {
-      const response = await getSingleUserAnswerFromQa({
+      const response = await deleteSingleUserProgress({
         activityId: __J,
-        userId: __I.userId,
       });
-      if (response.length <= 0) {
-        qaIdsToBeDeleted.push(__J);
-      }
+      console.log(
+        "Successfully deleted progress of ",
+        response,
+        " from user ",
+        __I.userId
+      );
     }
-    finalQaIncludes.push({
-      idCard,
-      userId: __I.userId,
-      qaIdsToBeDeleted,
-    });
   }
-
-  fs.writeFileSync(
-    join(__dirname, "./logs/lms/to-be-deleted/data.mjs"),
-    `${JSON.stringify(finalQaIncludes)}`
-  );
 
   return;
 };

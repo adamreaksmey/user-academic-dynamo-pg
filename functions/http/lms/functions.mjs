@@ -5,6 +5,7 @@ import {
   URL_getSingleUserFromCourse,
   URL_getSingleUserProgress,
   URL_modifyUserProgress,
+  URL_deleteSingleUserProgress,
 } from "./url.mjs";
 
 export const getUserProgressRecords = async (user) => {
@@ -69,4 +70,14 @@ export const getSingleUserFromCourse = async (uniqueKey) => {
   });
 
   return response.data.data[0];
+};
+
+export const deleteSingleUserProgress = async (data) => {
+  const { activityId } = data;
+  const response = await axios({
+    method: "DELETE",
+    url: URL_deleteSingleUserProgress(activityId),
+  });
+
+  return response.data;
 };

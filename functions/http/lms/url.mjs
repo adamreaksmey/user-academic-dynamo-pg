@@ -42,3 +42,12 @@ export const URL_getSingleUserFromCourse = (
   const url = `${prodUrl}/organizations/${LMS_ORG_ID}/courses/${courseId}/users?limit=10&start=0&filters=[]&sort={%22progress%22:%22desc%22}&keyword=${uniqueKey}`;
   return url;
 };
+
+export const URL_deleteSingleUserProgress = (
+  activityId,
+  userNumberId,
+  courseId = "edea75b8-93f2-494a-8e13-e51471fcef20"
+) => {
+  const url = `${prodUrl}/organizations/${LMS_ORG_ID}/courses/${courseId}/activities/${activityId}/userNumberId`;
+  return url;
+};
