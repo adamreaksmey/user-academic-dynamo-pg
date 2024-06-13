@@ -48,6 +48,6 @@ export const URL_deleteSingleUserProgress = (
   userNumberId,
   courseId = "edea75b8-93f2-494a-8e13-e51471fcef20"
 ) => {
-  const url = `${prodUrl}/organizations/${LMS_ORG_ID}/courses/${courseId}/activities/${activityId}/userNumberId`;
+  const url = `${prodUrl}/organizations/${LMS_ORG_ID}/courses/${courseId}/activities/${activityId}/${userNumberId}`;
   return url;
 };

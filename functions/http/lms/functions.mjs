@@ -8,6 +8,20 @@ import {
   URL_deleteSingleUserProgress,
 } from "./url.mjs";
 
+/**
+ * Retrieves the progress records for a user.
+ *
+ * @param {object} user - The user object.
+ * @returns {Promise<Array<object>>} - An array of progress records with the following properties:
+ *   - activityId: string
+ *   - courseUserId: number
+ *   - courseId: string
+ *   - userNumberId: number
+ *   - organizationId: string
+ *   - isCompleted: boolean
+ *   - progress: string
+ *   - percentage: number
+ */
 export const getUserProgressRecords = async (user) => {
   const response = await axios({
     method: "GET",
@@ -73,10 +87,11 @@ export const getSingleUserFromCourse = async (uniqueKey) => {
 };
 
 export const deleteSingleUserProgress = async (data) => {
-  const { activityId } = data;
+  const { activityId, userNumberId } = data;
+  console.log("-->", data);
   const response = await axios({
     method: "DELETE",
-    url: URL_deleteSingleUserProgress(activityId),
+    url: URL_deleteSingleUserProgress(activityId, userNumberId),
   });
 
   return response.data;

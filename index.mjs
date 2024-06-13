@@ -26,6 +26,7 @@ import { processSqlBackup } from "./functions/operations/sqlProcessor.mjs";
 
 import { sqlToObjects } from "./functions/operations/sqlToObjects.mjs";
 import { promises as pfs } from "fs";
+import { progressToRemoveFromLearningPath } from "./logs/lms/remove-progress-learningPath/data.mjs";
 
 import {
   __MASTER_MAPPER,
@@ -57,8 +58,9 @@ const main = async (__filename, __dirname) => {
   /**
    * HEAD FUNCTIONALITY
    */
-  const lessonsCount = await calculateLessonCountBasedOnQA(learningPath); // should be 72
-  const questionLearningPathId = lessonsCount.ids;
+  const lessonsCount = await calculateLessonCount(learningPath); // should be 72
+  // const questionLearningPathId = lessonsCount.ids;
+  const allLearningPathIds = lessonsCount.ids;
   const users = await processSqlBackup(
     "users",
     "./input_sql/lms/lms_user_07_06_2024.sql"
@@ -183,18 +185,25 @@ const main = async (__filename, __dirname) => {
   // );
 
   // ----------- OPERATION 4 ------------
-  for (const __I of toBeDeleted) {
-    for (const __J of __I.qaIdsToBeDeleted) {
-      const response = await deleteSingleUserProgress({
-        activityId: __J,
-      });
-      console.log(
-        "Successfully deleted progress of ",
-        response,
-        " from user ",
-        __I.userId
-      );
+  /**
+   * Remove user progress if no answers exist in qa
+   * & Remove progress if progress no exist in learningPath
+   */
+  for (const __I of progressToRemoveFromLearningPath) {
+    const response = await getUserProgressRecords({
+      idCard: __I.idCard,
+    });
+    console.log("Found user with their progress", response.length);
+    for (const __J of response) {
+      if (!allLearningPathIds.includes(__J.activityId)) {
+        const deleteResponse = await deleteSingleUserProgress({
+          activityId: __J.activityId,
+          userNumberId: usersMappedByIdCard.get(__I.idCard).userNumberId,
+        });
+        console.log("Irrelevant Id found and deleted!", deleteResponse);
+      }
     }
+    console.log("Processing next user");
   }
 
   return;
